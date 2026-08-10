@@ -1,0 +1,97 @@
+//import { } from "lucide-react";
+import Logo from "./Logo";
+
+// ─── Columnas de enlaces del pie de página ────────────────────────────────────
+
+const COLUMNAS = [
+  {
+    titulo: "Explorar",
+    enlaces: ["Inicio", "Más populares", "Temporada actual", "Próximos estrenos", "Top en emisión"],
+  },
+  {
+    titulo: "Géneros",
+    enlaces: ["Acción", "Romance", "Shounen", "Sci-Fi", "Fantasía"],
+  },
+  {
+    titulo: "Temporada 2026",
+    enlaces: ["Invierno", "Primavera", "Verano", "Otoño"],
+  },
+  {
+    titulo: "Formatos",
+    enlaces: ["ONAs", "OVAs", "Especiales", "Películas"],
+  },
+] as const;
+
+// ─── Pie de página principal ──────────────────────────────────────────────────
+
+export default function Footer() {
+  return (
+    <footer className="bg-[#06050e] text-[#8b82a8]">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 pt-14 pb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8">
+
+          {/* Marca e información general */}
+          <div className="col-span-2 sm:col-span-3 lg:col-span-2">
+            <a href="#" className="inline-block mb-4" aria-label="ANILIST">
+              <Logo className="h-5 w-auto" />
+            </a>
+            <p className="text-sm leading-relaxed max-w-[260px] mb-4">
+              Tu espacio personal para rastrear, organizar y descubrir anime y manga.
+              Ten el control de todo lo que ves y lees.
+            </p>
+            {/* Enlace a GitHub */}
+            <a
+              href="https://github.com"
+              aria-label="GitHub"
+              className="w-8 h-8 inline-flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              {/* <Github className="w-[18px] h-[18px]" /> */}
+            </a>
+          </div>
+
+          {/* Columnas de navegación generadas dinámicamente */}
+          {COLUMNAS.map(col => (
+            <div key={col.titulo}>
+              <h4 className="font-semibold uppercase text-[#946ed9] text-[11px] tracking-[1.4px] mb-4">
+                {col.titulo}
+              </h4>
+              <ul className="space-y-2.5">
+                {col.enlaces.map(enlace => (
+                  <li key={enlace}>
+                    <a href="#" className="text-sm hover:text-[#f0eefa] transition-colors">
+                      {enlace}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Barra inferior con copyright y políticas */}
+      <div className="border-t border-white/5">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#4a4360]">
+          <span>
+            Impulsado por{" "}
+            <a
+              href="https://jikan.moe"
+              className="underline text-[#8b82a8] hover:text-[#f0eefa] transition-colors"
+            >
+              Jikan API
+            </a>
+          </span>
+          <span>© 2026 ANILIST. Todos los derechos reservados.</span>
+          <span className="flex items-center gap-3">
+            <a href="#" className="underline text-[#8b82a8] hover:text-[#f0eefa] transition-colors">
+              Privacidad
+            </a>
+            <a href="#" className="underline text-[#8b82a8] hover:text-[#f0eefa] transition-colors">
+              Términos
+            </a>
+          </span>
+        </div>
+      </div>
+    </footer>
+  );
+}

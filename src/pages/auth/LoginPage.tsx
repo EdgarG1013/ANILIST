@@ -1,0 +1,138 @@
+import React, { useState } from "react";
+import Logo from "../../components/shared/Logo";
+import { Field, PasswordField, Checkbox, Divider, BtnPrimary } from "../../components/ui/FormFields";
+
+// ─── Props del formulario de inicio de sesión ─────────────────────────────────
+
+interface LoginPageProps {
+  /** Cambia la vista a "registro" */
+  onIrARegistro: () => void;
+  /** Cambia la vista a "recuperar contraseña" */
+  onIrARecuperar: () => void;
+  /** Llamado cuando el login fue exitoso, recibe el identificador del usuario */
+  onExito: (usuario: string) => void;
+}
+
+// ─── Validaciones del formulario ──────────────────────────────────────────────
+
+function validar(identificador: string, contrasena: string) {
+  const errores: Record<string, string> = {};
+  if (!identificador.trim())
+    errores.identificador = "Este campo es obligatorio.";
+  if (!contrasena)
+    errores.contrasena = "Este campo es obligatorio.";
+  else if (contrasena.length < 6)
+    errores.contrasena = "La contraseña debe tener al menos 6 caracteres.";
+  return errores;
+}
+
+// ─── Página / vista de inicio de sesión ──────────────────────────────────────
+
+export default function LoginPage({ onIrARegistro, onIrARecuperar, onExito }: LoginPageProps) {
+  const [identificador, setIdentificador] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  const [recuerdame, setRecuerdame] = useState(false);
+  const [errores, setErrores] = useState<Record<string, string>>({});
+  const [cargando, setCargando] = useState(false);
+
+  function handleSubmit(ev: React.FormEvent) {
+    ev.preventDefault();
+    const e = validar(identificador, contrasena);
+    setErrores(e);
+    if (Object.keys(e).length > 0) return;
+
+    // Simula la llamada a la API de autenticación
+    setCargando(true);
+    setTimeout(() => {
+      setCargando(false);
+      onExito(identificador);
+    }, 900);
+  }
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+
+      {/* Encabezado con logo y título */}
+      <div className="flex flex-col items-center gap-4 mb-1">
+        <Logo className="h-8 w-auto" />
+        <div className="text-center">
+          <h2
+            className="text-2xl font-extrabold text-[#f0eefa]"
+            style={{ fontFamily: "'Oxanium', sans-serif" }}
+          >
+            Bienvenido de vuelta
+          </h2>
+          <p className="text-sm text-[#8b82a8] mt-1">Continúa con tu aventura anime</p>
+        </div>
+      </div>
+
+      {/* Campos del formulario */}
+      <Field
+        label="Usuario o Email"
+        id="login-id"
+        placeholder="tu_usuario o correo@ejemplo.com"
+        value={identificador}
+        onChange={setIdentificador}
+        error={errores.identificador}
+      />
+
+      <PasswordField
+        label="Contraseña"
+        id="login-pass"
+        placeholder="••••••••"
+        value={contrasena}
+        onChange={setContrasena}
+        error={errores.contrasena}
+      />
+
+      {/* Opciones secundarias: recuérdame y recuperar contraseña */}
+      <div className="flex items-center justify-between gap-2">
+        <Checkbox checked={recuerdame} onChange={setRecuerdame}>
+          Recuérdame
+        </Checkbox>
+        <button
+          type="button"
+          onClick={onIrARecuperar}
+          className="text-[13px] text-[#946ed9] hover:text-[#b08ee8] transition-colors shrink-0"
+        >
+          ¿Olvidaste tu contraseña?
+        </button>
+      </div>
+
+      {/* Botón principal */}
+      <BtnPrimary type="submit" loading={cargando}>
+        {cargando ? "Iniciando sesión…" : "Iniciar sesión"}
+      </BtnPrimary>
+
+      <Divider label="o continúa con" />
+
+      {/* Botones de acceso social (placeholder) */}
+      <div className="grid grid-cols-2 gap-3">
+        {[{ label: "Google", inicial: "G" }, { label: "Discord", inicial: "D" }].map(s => (
+          <button
+            key={s.label}
+            type="button"
+            className="flex items-center justify-center gap-2 h-11 rounded-xl border border-[#2a2140] bg-[#0d0b16] hover:border-[#946ed9]/40 hover:bg-[#130f22] transition-all text-sm text-[#c4bbd8] font-medium"
+          >
+            <span className="w-5 h-5 rounded-full bg-[#2a2140] flex items-center justify-center text-[10px] font-bold text-[#946ed9]">
+              {s.inicial}
+            </span>
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Enlace para ir a registro */}
+      <p className="text-center text-sm text-[#8b82a8]">
+        ¿No tienes cuenta?{" "}
+        <button
+          type="button"
+          onClick={onIrARegistro}
+          className="text-[#946ed9] font-semibold hover:text-[#b08ee8] transition-colors"
+        >
+          Regístrate
+        </button>
+      </p>
+    </form>
+  );
+}

@@ -1,0 +1,30 @@
+
+@font-face {
+font-display: swap;
+font-family: '__Nunito_Sans_ee04dc';
+font-style: normal;
+font-weight: 200 1000;
+font-stretch: 100%;
+unicode-range: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fd802e467f76c8c3684050394f86f8c1297ed9f62.woff2?generation=1778195492256538&alt=media') format('woff2');
+}
+
+@font-face {
+font-display: swap;
+font-family: '__Bebas_Neue_d758cf';
+font-style: normal;
+font-weight: 400;
+font-stretch: normal;
+unicode-range: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fc0320a87ee453b8ed78f0312c30056309b7c0d27.woff2?generation=1778001146012224&alt=media') format('woff2');
+}
+
+@font-face {
+font-display: swap;
+font-family: '__Marck_Script_653b33';
+font-style: normal;
+font-weight: 400;
+font-stretch: normal;
+unicode-range: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fb1d4b90d800fc5fcae1d8f7071016d4104497422.woff2?generation=1786160569002263&alt=media') format('woff2');
+}

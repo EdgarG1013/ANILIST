@@ -1,122 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from "react";
+import { type AuthMode } from "./api/anime";
+import Navbar from "./components/shared/Navbar";
+import Footer from "./components/shared/Footer";
+import HomePage from "./pages/home/HomePage";
+import AuthModal from "./pages/auth/AuthModal";
 
-function App() {
-  const [count, setCount] = useState(0)
+// ─── Punto de entrada principal de ANILIST ────────────────────────────────────
+// Gestiona el estado global de autenticación y orquesta las vistas/modales.
+// Para agregar más páginas en el futuro, crear el componente en /pages y
+// añadir el estado de navegación aquí.
+
+export default function App() {
+  /** Usuario autenticado. null indica que no hay sesión activa */
+  const [usuario, setUsuario] = useState<string | null>(null);
+
+  /** Modo del modal de autenticación. "ninguno" = modal cerrado */
+  const [modoAuth, setModoAuth] = useState<AuthMode>("ninguno");
+
+  // ─── Manejadores de autenticación ─────────────────────────────────────────
+
+  function handleExitoAuth(nombreUsuario: string) {
+    setUsuario(nombreUsuario);
+    setModoAuth("ninguno");
+  }
+
+  function handleCerrarSesion() {
+    setUsuario(null);
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div
+      className="min-h-screen bg-[#0a0910] text-[#f0eefa] overflow-x-hidden"
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
+    >
+      {/* Modal de autenticación — se monta solo cuando está activo */}
+      {modoAuth !== "ninguno" && (
+        <AuthModal
+          modo={modoAuth}
+          onCerrar={() => setModoAuth("ninguno")}
+          onCambiarModo={setModoAuth}
+          onExito={handleExitoAuth}
+        />
+      )}
 
-      <div className="ticks"></div>
+      {/* Barra de navegación superior (sticky) */}
+      <Navbar
+        usuario={usuario}
+        onIniciarSesion={() => setModoAuth("login")}
+        onRegistrarse={() => setModoAuth("registro")}
+        onCerrarSesion={handleCerrarSesion}
+      />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {/* Página de inicio — hero + secciones de anime */}
+      <HomePage />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {/* Pie de página */}
+      <Footer />
+    </div>
+  );
 }
 
-export default App
