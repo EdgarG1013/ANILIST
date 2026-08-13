@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
-import HomePage from "./pages/home/HomePage";
+import HomePage from "./pages/landing/HomePage";
 
 // ─── Definición centralizada de rutas ─────────────────────────────────────────
 // Agrega aquí las rutas futuras del proyecto (login, registro, detalle, etc.)

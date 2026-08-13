@@ -39,14 +39,6 @@ export default function Footer() {
               Tu espacio personal para rastrear, organizar y descubrir anime y manga.
               Ten el control de todo lo que ves y lees.
             </p>
-            {/* Enlace a GitHub */}
-            <a
-              href="https://github.com"
-              aria-label="GitHub"
-              className="w-8 h-8 inline-flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              {/* <Github className="w-[18px] h-[18px]" /> */}
-            </a>
           </div>
 
           {/* Columnas de navegación generadas dinámicamente */}

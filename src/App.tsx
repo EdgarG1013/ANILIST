@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
-import Navbar from "./components/shared/Navbar";
-import Footer from "./components/shared/Footer";
+import Navbar from "./components/compartido/Navbar";
+import Footer from "./components/compartido/Footer";
 
 // ─── Layout principal de ANILIST ──────────────────────────────────────────────
 // Envuelve todas las páginas con la barra de navegación y el pie de página.
