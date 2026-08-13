@@ -1,5 +1,5 @@
 //import { } from "lucide-react";
-import Logo from "./Logo";
+import logo from "../../assets/logo.svg";
 
 // ─── Columnas de enlaces del pie de página ────────────────────────────────────
 
@@ -33,7 +33,7 @@ export default function Footer() {
           {/* Marca e información general */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-2">
             <a href="#" className="inline-block mb-4" aria-label="ANILIST">
-              <Logo className="h-5 w-auto" />
+              <img src={logo} alt="ANILIST" className="h-5 w-auto" />
             </a>
             <p className="text-sm leading-relaxed max-w-[260px] mb-4">
               Tu espacio personal para rastrear, organizar y descubrir anime y manga.

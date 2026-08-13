@@ -45,9 +45,6 @@ export interface AnimePopular {
   img: string;
 }
 
-/** Modos del modal de autenticación */
-export type AuthMode = "ninguno" | "login" | "registro" | "recuperar";
-
 // ─── Colores por tipo de anime ────────────────────────────────────────────────
 
 export const TIPO_COLORES: Record<string, string> = {
@@ -56,12 +53,6 @@ export const TIPO_COLORES: Record<string, string> = {
   OVA: "bg-[#388e3c]",
   Movie: "bg-[#d97706]",
 };
-
-// ─── Imagen de fondo para el modal de autenticación ──────────────────────────
-
-/** Calle japonesa nocturna — sin degradado, imagen pura */
-export const AUTH_BG =
-  "https://images.unsplash.com/photo-1628850627071-42b3fb16533d?w=1920&h=1080&fit=crop&auto=format&q=80";
 
 // ─── Hero — carrusel principal ────────────────────────────────────────────────
 
