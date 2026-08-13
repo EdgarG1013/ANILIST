@@ -1,4 +1,4 @@
-![anilist](./public/g10.svg)
+![anilist](./public/ANILIST.svg)
 
 
 
