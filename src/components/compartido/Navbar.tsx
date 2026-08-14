@@ -4,7 +4,7 @@ import logo from "../../assets/logo.svg";
 
 // ─── Navegación principal ─────────────────────────────────────────────────────
 
-const ENLACES_NAV = ["Populares", "Temporada", "Próximos", "Top en emisión"] as const;
+const ENLACES_NAV = ["Temporada", "Próximos", "Top en emisión"] as const;
 
 export default function Navbar() {
   const [menuMovilAbierto, setMenuMovilAbierto] = useState(false);

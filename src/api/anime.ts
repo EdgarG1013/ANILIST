@@ -73,20 +73,6 @@ export const HERO: HeroAnime[] = [
   },
   {
     id: 2,
-    title: "Shingeki no Kyojin",
-    altTitle: "Attack on Titan",
-    score: 9.1,
-    type: "TV",
-    year: 2013,
-    studio: "Wit Studio",
-    eps: 25,
-    genres: ["Acción", "Premiado", "Drama", "Suspenso"],
-    synopsis:
-      "Hace siglos, la humanidad fue diezmada por criaturas humanoides gigantes llamadas Titanes. Los supervivientes se refugiaron tras enormes muros. Cuando el muro exterior es destruido, la lucha por la supervivencia vuelve a comenzar…",
-    img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F03f9cd95d3a162bf982aa1ccb9a65c697e8115d9.jpg?generation=1780151446887126&alt=media",
-  },
-  {
-    id: 3,
     title: "Re:Zero kara Hajimeru",
     altTitle: "Re:Zero − Starting Life in Another World S4",
     score: 8.8,
@@ -97,36 +83,8 @@ export const HERO: HeroAnime[] = [
     genres: ["Drama", "Fantasía", "Suspenso"],
     synopsis:
       "Subaru Natsuki continúa su lucha usando su poder de Regreso por Muerte para proteger a quienes ama. La cuarta temporada eleva las apuestas más que nunca en un mundo lleno de misterios y peligros.",
-    img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F1a7fb8f72c6e87c31f4a24955637f11bdc296065.jpg?generation=1786160569657849&alt=media",
-  },
-  {
-    id: 4,
-    title: "Bleach: TYBW",
-    altTitle: "Bleach: Sennen Kessen-hen — Kashin-tan",
-    score: 9.03,
-    type: "TV",
-    year: 2026,
-    studio: "Pierrot",
-    eps: 13,
-    genres: ["Acción", "Aventura", "Sobrenatural"],
-    synopsis:
-      "El Wandenreich lanza su segunda invasión a la Soul Society. Ichigo y sus aliados enfrentan a sus enemigos más poderosos en una batalla que decidirá el destino de todos los mundos.",
-    img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F33c218901a33c7a3b58abccdabe37414e6122abe.jpg?generation=1786160569464556&alt=media",
-  },
-  {
-    id: 5,
-    title: "Steel Ball Run",
-    altTitle: "JoJo no Kimyou na Bouken: Steel Ball Run",
-    score: 9.2,
-    type: "ONA",
-    year: 2026,
-    studio: "David Production",
-    eps: 37,
-    genres: ["Acción", "Aventura", "Sobrenatural"],
-    synopsis:
-      "En la América de 1890, el presidente Funny Valentine anuncia una carrera transcontinental a caballo. Johnny Joestar y Gyro Zeppeli descubren que la competición esconde secretos sobrenaturales ligados a reliquias sagradas.",
-    img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F4aa825c6b64fcc0c69cc7be0484dc3043f187b4c.jpg?generation=1786160569653404&alt=media",
-  },
+    img: "https://img.youtube.com/vi/jVl4bY81iIs/maxresdefault.jpg",
+  }
 ];
 
 // ─── En Temporada — grid de anime actuales ────────────────────────────────────
