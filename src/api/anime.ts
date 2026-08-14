@@ -99,7 +99,7 @@ export const HERO: HeroAnime[] = [
     genres: ["Drama", "Fantasía", "Suspenso"],
     synopsis:
       "Subaru Natsuki continúa su lucha usando su poder de Regreso por Muerte para proteger a quienes ama. La cuarta temporada eleva las apuestas más que nunca en un mundo lleno de misterios y peligros.",
-    img: "https://img.youtube.com/vi/jVl4bY81iIs/maxresdefault.jpg",
+    img: "https://m.media-amazon.com/images/M/MV5BOTYwZDAzNzYtODc3Zi00ZWM2LThmY2YtNzZhMDA4ZGMyMzZiXkEyXkFqcGc@._V1_.jpg",
   }
 ];
 

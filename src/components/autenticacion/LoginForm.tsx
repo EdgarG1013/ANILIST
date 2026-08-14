@@ -38,16 +38,16 @@ export default function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
       {/* Encabezado */}
       <div className="mb-1">
         <h2
           className="text-2xl font-extrabold text-[#f0eefa]"
           style={{ fontFamily: "'Oxanium', sans-serif" }}
         >
-          Bienvenido de vuelta
+          Iniciar sesión
         </h2>
-        <p className="text-sm text-[#8b82a8] mt-1">Continúa con tu aventura anime</p>
+        <p className="text-sm text-[#8b82a8] mt-1">No te pierdas tus anime favoritos</p>
       </div>
 
       {/* Campos del formulario */}
@@ -82,10 +82,23 @@ export default function LoginForm() {
         </Link>
       </div>
 
-      {/* Botón principal */}
-      <BtnPrimary type="submit" loading={cargando}>
-        {cargando ? "Iniciando sesión…" : "Iniciar sesión"}
-      </BtnPrimary>
+      {/* Botones: Volver e Ingresar */}
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          className="flex items-center justify-center gap-2 h-11 rounded-xl border border-[#2a2140] bg-[#0d0b16] hover:border-[#946ed9]/40 hover:bg-[#130f22] transition-all text-sm text-[#c4bbd8] font-bold"
+        >
+          ← Volver
+        </button>
+        <BtnPrimary
+          type="submit"
+          loading={cargando}
+          className="flex items-center justify-center gap-2 h-11 rounded-xl border border-[#946ed9] bg-[#946ed9] hover:bg-[#b08ee8] hover:border-[#b08ee8] transition-all text-sm text-[#c4bbd8] font-bold disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {cargando ? "Iniciando sesión…" : "Ingresar"}
+        </BtnPrimary>
+      </div>
 
       <Divider label="o continúa con" />
 

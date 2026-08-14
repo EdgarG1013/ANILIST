@@ -54,15 +54,12 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-9">
       {!enviado ? (
         /* ── Estado inicial: formulario de solicitud ── */
         <>
           {/* Ícono y títulos */}
-          <div className="flex flex-col items-start gap-3">
-            <div className="w-14 h-14 rounded-full bg-[#946ed9]/15 border border-[#946ed9]/30 flex items-center justify-center">
-              <Mail className="w-6 h-6 text-[#946ed9]" />
-            </div>
+          <div className="flex flex-col items-start gap-9">
             <div>
               <h2
                 className="text-2xl font-extrabold text-[#f0eefa]"
@@ -70,7 +67,7 @@ export default function ForgotPasswordForm() {
               >
                 ¿Olvidaste tu contraseña?
               </h2>
-              <p className="text-sm text-[#8b82a8] mt-1 max-w-xs">
+              <p className="text-sm text-[#8b82a8] mt-3 max-w-xs">
                 Ingresa tu email y te enviaremos las instrucciones para recuperar el acceso.
               </p>
             </div>
@@ -104,7 +101,7 @@ export default function ForgotPasswordForm() {
         </>
       ) : (
         /* ── Estado de éxito: confirmación de envío ── */
-        <div className="flex flex-col items-center gap-5 text-center py-4">
+        <div className="flex flex-col items-center gap-9 text-center py-4">
           {/* Ícono de éxito */}
           <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
             <CheckCircle className="w-7 h-7 text-emerald-400" />

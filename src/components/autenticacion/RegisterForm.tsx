@@ -86,7 +86,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
       {/* Encabezado */}
       <div className="mb-1">
         <h2
@@ -158,7 +158,7 @@ export default function RegisterForm() {
       />
 
       {/* Aceptación de términos */}
-      <div>
+      <div className="flex flex-col pt-1.5">
         <Checkbox checked={terminos} onChange={setTerminos}>
           Acepto los{" "}
           <Link to="/terminos" className="text-[#946ed9] hover:underline">
@@ -174,10 +174,23 @@ export default function RegisterForm() {
         )}
       </div>
 
-      {/* Botón principal */}
-      <BtnPrimary type="submit" loading={cargando}>
-        {cargando ? "Creando cuenta…" : "Crear cuenta"}
-      </BtnPrimary>
+      {/* Botones: Volver y Crear cuenta */}
+      <div className="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          className="flex items-center justify-center gap-2 h-11 rounded-xl border border-[#2a2140] bg-[#0d0b16] hover:border-[#946ed9]/40 hover:bg-[#130f22] transition-all text-sm text-[#c4bbd8] font-bold"
+        >
+          ← Volver
+        </button>
+        <BtnPrimary
+          type="submit"
+          loading={cargando}
+          className="flex items-center justify-center gap-2 h-11 rounded-xl border border-[#946ed9] bg-[#946ed9] hover:bg-[#b08ee8] hover:border-[#b08ee8] transition-all text-sm text-[#c4bbd8] font-bold disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {cargando ? "Creando cuenta…" : "Crear cuenta"}
+        </BtnPrimary>
+      </div>
 
       {/* Enlace para ir a inicio de sesión */}
       <p className="text-center text-sm text-[#8b82a8]">
