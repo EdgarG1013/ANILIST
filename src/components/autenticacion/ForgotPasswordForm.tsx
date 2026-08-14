@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Field, BtnPrimary } from "../ui/FormFields";
 
 // ─── Formulario de recuperación de contraseña (lógica) ───────────────────────

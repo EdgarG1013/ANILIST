@@ -66,12 +66,13 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         {/* Features */}
         <div className="flex gap-8">
           {features.map(({ icon: Icon, title, description }) => (
-            <div key={title} className="flex flex-col gap-2 max-w-[160px]">
+            <div key={title} className="flex flex-col gap-4 max-w-[160px]">
               <Icon className="h-6 w-6 text-[#946ed9]" strokeWidth={2} />
-              <span className="font-semibold text-sm text-[#f0eefa]">
+              <span className="font-bold text-xl text-[#f0eefa]"
+                style={{ fontFamily: "'Oxanium', sans-serif" }}>
                 {title}
               </span>
-              <span className="text-xs text-[#8b82a8] leading-snug">
+              <span className="text-sm text-[#8b82a8] leading-snug">
                 {description}
               </span>
             </div>
