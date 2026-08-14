@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Search, Menu, X } from "lucide-react";
 import logo from "../../assets/logo.svg";
 
@@ -48,18 +49,20 @@ export default function Navbar() {
 
         {/* Botones de autenticación — desktop */}
         <div className="hidden sm:flex items-center gap-2">
-          <button
-            className="h-9 px-4 text-sm font-semibold text-[#f0eefa] border border-[#2a2140] rounded-xl hover:border-[#946ed9]/50 hover:bg-[#16141e] transition-all"
+          <Link
+            to="/iniciar-sesion"
+            className="h-9 px-4 text-sm font-semibold text-[#f0eefa] border border-[#2a2140] rounded-xl hover:border-[#946ed9]/50 hover:bg-[#16141e] transition-all flex items-center"
             style={{ fontFamily: "'Oxanium', sans-serif" }}
           >
             Iniciar sesión
-          </button>
-          <button
-            className="h-9 px-4 text-sm font-semibold text-white rounded-xl transition-opacity hover:opacity-90"
+          </Link>
+          <Link
+            to="/registro"
+            className="h-9 px-4 text-sm font-semibold text-white rounded-xl transition-opacity hover:opacity-90 flex items-center"
             style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)", fontFamily: "'Oxanium', sans-serif" }}
           >
             Registrarse
-          </button>
+          </Link>
         </div>
 
         {/* Controles móviles: buscador + hamburguesa */}
@@ -106,18 +109,22 @@ export default function Navbar() {
 
           {/* Botones de auth en móvil */}
           <div className="flex gap-2 pt-3">
-            <button
-              className="flex-1 h-9 text-xs font-semibold text-[#f0eefa] border border-[#2a2140] rounded-xl"
+            <Link
+              to="/iniciar-sesion"
+              className="flex-1 h-9 text-xs font-semibold text-[#f0eefa] border border-[#2a2140] rounded-xl flex items-center justify-center"
               style={{ fontFamily: "'Oxanium', sans-serif" }}
+              onClick={() => setMenuMovilAbierto(false)}
             >
               Iniciar sesión
-            </button>
-            <button
-              className="flex-1 h-9 text-xs font-semibold text-white rounded-xl"
+            </Link>
+            <Link
+              to="/registro"
+              className="flex-1 h-9 text-xs font-semibold text-white rounded-xl flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)", fontFamily: "'Oxanium', sans-serif" }}
+              onClick={() => setMenuMovilAbierto(false)}
             >
               Registrarse
-            </button>
+            </Link>
           </div>
         </div>
       )}
