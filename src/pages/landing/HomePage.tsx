@@ -1,6 +1,7 @@
 import HeroSection from "../../components/landing/HeroSection";
 import SeasonSection from "../../components/landing/SeasonSection";
-import TopAnimeSection from "../../components/landing/TopAnimeSection";
+import ProximosSection from "../../components/landing/ProximosSection";
+import MostPopularSection from "../../components/landing/MostPopularSection";
 
 // ─── Página de inicio — Landing page ─────────────────────────────────────────
 // Compone las secciones de la landing. Cada sección vive en /components/landing.
@@ -16,8 +17,12 @@ export default function HomePage() {
         {/* En Temporada */}
         <SeasonSection />
 
-        {/* Top Anime */}
-        <TopAnimeSection />
+        {/* Próximos estrenos */}
+        <ProximosSection />
+
+        {/* Más Populares — anime y manga */}
+        <MostPopularSection />
+
       </main>
     </div>
   );

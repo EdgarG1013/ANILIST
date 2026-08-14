@@ -1,5 +1,7 @@
 // ─── Tipos de datos ───────────────────────────────────────────────────────────
 
+import type { PopularItem } from "./jikan";
+
 /** Anime destacado en el hero / carrusel principal */
 export interface HeroAnime {
   id: number;
@@ -43,6 +45,20 @@ export interface AnimePopular {
   genres: string[];
   synopsis: string;
   img: string;
+}
+
+/** Adaptador: anime popular → item normalizado del carrusel */
+export function toPopularAnime(a: AnimePopular): PopularItem {
+  return {
+    id: a.rank,
+    title: a.title,
+    synopsis: a.synopsis,
+    genres: a.genres,
+    year: a.year,
+    count: a.eps,
+    countLabel: "episodio",
+    img: a.img,
+  };
 }
 
 // ─── Colores por tipo de anime ────────────────────────────────────────────────
@@ -98,6 +114,66 @@ export const TEMPORADA: AnimeCard[] = [
   { id: 54000, title: "Otome Game Sekai wa Mob ni Kibishii Sekai desu 2", year: 2026, score: 6.68, type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fb82c1dd49ee1b0f5c53ff0164819ecd1fcc6806f.jpg?generation=1786160569509276&alt=media" },
   { id: 62542, title: "Grand Blue Season 3", year: 2026, score: 8.39, type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fcbf1677bc9f3ff0c1a90b8f3e35d69d11d6674d5.jpg?generation=1786160569626844&alt=media" },
   { id: 63832, title: "Seihantai na Kimi to Boku 2nd Season", year: 2026, score: 8.42, type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fb84dc3a17c382c9b03f1020d17dfb6f1c9eeb137.jpg?generation=1786160569631433&alt=media" },
+];
+
+export const PROXIMAMENTE: AnimeCard[] = [
+  {
+    id: 62516, title: "Dandadan 3rd Season", year: 2027, score: 0, type: "TV", img: "https://cdn.myanimelist.net/images/anime/1671/154516l.jpg" },
+  {
+    id: 57584, title: "Kage no Jitsuryokusha ni Naritakute! Movie: Zankyou-hen",
+    year: 2027,
+    score: 0,
+    type: "Movie",
+    img: "https://cdn.myanimelist.net/images/anime/1797/156362l.jpg"
+  },
+  {
+    id: 59068,
+    title: "Dungeon Meshi Season 2",
+    year: 2027,
+    score: 0,
+    type: "TV",
+    img: "https://cdn.myanimelist.net/images/anime/1830/158890l.jpg"
+  },
+  {
+    id: 61987,
+    title: "Kusuriya no Hitorigoto 3rd Season",
+    year: 2026,
+    score: 0,
+    type: "TV",
+    img: "https://cdn.myanimelist.net/images/anime/1862/152811l.jpg"
+  },
+  {
+    id: 61006,
+    title: "Bocchi the Rock! 2nd Season",
+    year: 0,
+    score: 0,
+    type: "TV",
+    img: "https://cdn.myanimelist.net/images/anime/1142/148003l.jpg"
+  },
+  {
+    id: 60636,
+    title: "Bleach: Sennen Kessen-hen - Kashin-tan",
+    year: 2026,
+    score: 0,
+    type: "TV",
+    img: "https://cdn.myanimelist.net/images/anime/1275/158595l.jpg"
+  },
+  {
+    id: 59873,
+    title: "Tokidoki Bosotto Russia-go de Dereru Tonari no Alya-san Season 2",
+    year: 2027,
+    score: 0,
+    type: "TV",
+    img: "https://cdn.myanimelist.net/images/anime/1711/156333l.jpg"
+  },
+  {
+    id: 61990,
+    title: "Cyberpunk: Edgerunners 2",
+    year: 2026,
+    score: 0,
+    type: "ONA",
+    img: "https://cdn.myanimelist.net/images/anime/1880/158764l.jpg"
+  },
 ];
 
 // ─── Top Anime — ranking semanal ─────────────────────────────────────────────
