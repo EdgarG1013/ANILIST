@@ -1,5 +1,7 @@
 // ─── Tipos de datos ───────────────────────────────────────────────────────────
 
+import type { PopularItem } from "./jikan";
+
 /** Anime destacado en el hero / carrusel principal */
 export interface HeroAnime {
   id: number;
@@ -45,8 +47,19 @@ export interface AnimePopular {
   img: string;
 }
 
-/** Modos del modal de autenticación */
-export type AuthMode = "ninguno" | "login" | "registro" | "recuperar";
+/** Adaptador: anime popular → item normalizado del carrusel */
+export function toPopularAnime(a: AnimePopular): PopularItem {
+  return {
+    id: a.rank,
+    title: a.title,
+    synopsis: a.synopsis,
+    genres: a.genres,
+    year: a.year,
+    count: a.eps,
+    countLabel: "episodio",
+    img: a.img,
+  };
+}
 
 // ─── Colores por tipo de anime ────────────────────────────────────────────────
 
@@ -56,12 +69,6 @@ export const TIPO_COLORES: Record<string, string> = {
   OVA: "bg-[#388e3c]",
   Movie: "bg-[#d97706]",
 };
-
-// ─── Imagen de fondo para el modal de autenticación ──────────────────────────
-
-/** Calle japonesa nocturna — sin degradado, imagen pura */
-export const AUTH_BG =
-  "https://images.unsplash.com/photo-1628850627071-42b3fb16533d?w=1920&h=1080&fit=crop&auto=format&q=80";
 
 // ─── Hero — carrusel principal ────────────────────────────────────────────────
 
@@ -82,20 +89,6 @@ export const HERO: HeroAnime[] = [
   },
   {
     id: 2,
-    title: "Shingeki no Kyojin",
-    altTitle: "Attack on Titan",
-    score: 9.1,
-    type: "TV",
-    year: 2013,
-    studio: "Wit Studio",
-    eps: 25,
-    genres: ["Acción", "Premiado", "Drama", "Suspenso"],
-    synopsis:
-      "Hace siglos, la humanidad fue diezmada por criaturas humanoides gigantes llamadas Titanes. Los supervivientes se refugiaron tras enormes muros. Cuando el muro exterior es destruido, la lucha por la supervivencia vuelve a comenzar…",
-    img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F03f9cd95d3a162bf982aa1ccb9a65c697e8115d9.jpg?generation=1780151446887126&alt=media",
-  },
-  {
-    id: 3,
     title: "Re:Zero kara Hajimeru",
     altTitle: "Re:Zero − Starting Life in Another World S4",
     score: 8.8,
@@ -106,36 +99,8 @@ export const HERO: HeroAnime[] = [
     genres: ["Drama", "Fantasía", "Suspenso"],
     synopsis:
       "Subaru Natsuki continúa su lucha usando su poder de Regreso por Muerte para proteger a quienes ama. La cuarta temporada eleva las apuestas más que nunca en un mundo lleno de misterios y peligros.",
-    img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F1a7fb8f72c6e87c31f4a24955637f11bdc296065.jpg?generation=1786160569657849&alt=media",
-  },
-  {
-    id: 4,
-    title: "Bleach: TYBW",
-    altTitle: "Bleach: Sennen Kessen-hen — Kashin-tan",
-    score: 9.03,
-    type: "TV",
-    year: 2026,
-    studio: "Pierrot",
-    eps: 13,
-    genres: ["Acción", "Aventura", "Sobrenatural"],
-    synopsis:
-      "El Wandenreich lanza su segunda invasión a la Soul Society. Ichigo y sus aliados enfrentan a sus enemigos más poderosos en una batalla que decidirá el destino de todos los mundos.",
-    img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F33c218901a33c7a3b58abccdabe37414e6122abe.jpg?generation=1786160569464556&alt=media",
-  },
-  {
-    id: 5,
-    title: "Steel Ball Run",
-    altTitle: "JoJo no Kimyou na Bouken: Steel Ball Run",
-    score: 9.2,
-    type: "ONA",
-    year: 2026,
-    studio: "David Production",
-    eps: 37,
-    genres: ["Acción", "Aventura", "Sobrenatural"],
-    synopsis:
-      "En la América de 1890, el presidente Funny Valentine anuncia una carrera transcontinental a caballo. Johnny Joestar y Gyro Zeppeli descubren que la competición esconde secretos sobrenaturales ligados a reliquias sagradas.",
-    img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F4aa825c6b64fcc0c69cc7be0484dc3043f187b4c.jpg?generation=1786160569653404&alt=media",
-  },
+    img: "https://m.media-amazon.com/images/M/MV5BOTYwZDAzNzYtODc3Zi00ZWM2LThmY2YtNzZhMDA4ZGMyMzZiXkEyXkFqcGc@._V1_.jpg",
+  }
 ];
 
 // ─── En Temporada — grid de anime actuales ────────────────────────────────────
@@ -149,6 +114,66 @@ export const TEMPORADA: AnimeCard[] = [
   { id: 54000, title: "Otome Game Sekai wa Mob ni Kibishii Sekai desu 2", year: 2026, score: 6.68, type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fb82c1dd49ee1b0f5c53ff0164819ecd1fcc6806f.jpg?generation=1786160569509276&alt=media" },
   { id: 62542, title: "Grand Blue Season 3", year: 2026, score: 8.39, type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fcbf1677bc9f3ff0c1a90b8f3e35d69d11d6674d5.jpg?generation=1786160569626844&alt=media" },
   { id: 63832, title: "Seihantai na Kimi to Boku 2nd Season", year: 2026, score: 8.42, type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fb84dc3a17c382c9b03f1020d17dfb6f1c9eeb137.jpg?generation=1786160569631433&alt=media" },
+];
+
+export const PROXIMAMENTE: AnimeCard[] = [
+  {
+    id: 62516, title: "Dandadan 3rd Season", year: 2027, score: 0, type: "TV", img: "https://cdn.myanimelist.net/images/anime/1671/154516l.jpg" },
+  {
+    id: 57584, title: "Kage no Jitsuryokusha ni Naritakute! Movie: Zankyou-hen",
+    year: 2027,
+    score: 0,
+    type: "Movie",
+    img: "https://cdn.myanimelist.net/images/anime/1797/156362l.jpg"
+  },
+  {
+    id: 59068,
+    title: "Dungeon Meshi Season 2",
+    year: 2027,
+    score: 0,
+    type: "TV",
+    img: "https://cdn.myanimelist.net/images/anime/1830/158890l.jpg"
+  },
+  {
+    id: 61987,
+    title: "Kusuriya no Hitorigoto 3rd Season",
+    year: 2026,
+    score: 0,
+    type: "TV",
+    img: "https://cdn.myanimelist.net/images/anime/1862/152811l.jpg"
+  },
+  {
+    id: 61006,
+    title: "Bocchi the Rock! 2nd Season",
+    year: 0,
+    score: 0,
+    type: "TV",
+    img: "https://cdn.myanimelist.net/images/anime/1142/148003l.jpg"
+  },
+  {
+    id: 60636,
+    title: "Bleach: Sennen Kessen-hen - Kashin-tan",
+    year: 2026,
+    score: 0,
+    type: "TV",
+    img: "https://cdn.myanimelist.net/images/anime/1275/158595l.jpg"
+  },
+  {
+    id: 59873,
+    title: "Tokidoki Bosotto Russia-go de Dereru Tonari no Alya-san Season 2",
+    year: 2027,
+    score: 0,
+    type: "TV",
+    img: "https://cdn.myanimelist.net/images/anime/1711/156333l.jpg"
+  },
+  {
+    id: 61990,
+    title: "Cyberpunk: Edgerunners 2",
+    year: 2026,
+    score: 0,
+    type: "ONA",
+    img: "https://cdn.myanimelist.net/images/anime/1880/158764l.jpg"
+  },
 ];
 
 // ─── Top Anime — ranking semanal ─────────────────────────────────────────────

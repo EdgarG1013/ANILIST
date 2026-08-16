@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
-import Logo from "../../components/shared/Logo";
-import { Field, BtnPrimary } from "../../components/ui/FormFields";
+import { Link } from "react-router-dom";
+import { ArrowLeft, CheckCircle } from "lucide-react";
+import { Field, BtnPrimary } from "../ui/FormFields";
 
-// ─── Props de la página de recuperación de contraseña ────────────────────────
+// ─── Formulario de recuperación de contraseña (lógica) ───────────────────────
 
-interface ForgotPasswordPageProps {
-  /** Vuelve al formulario de inicio de sesión */
-  onIrALogin: () => void;
-}
-
-// ─── Tiempo de espera para reenvío (en segundos) ──────────────────────────────
 const TIEMPO_REENVIO = 60;
 
-// ─── Página / vista de recuperación de contraseña ────────────────────────────
-
-export default function ForgotPasswordPage({ onIrALogin }: ForgotPasswordPageProps) {
+export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -62,21 +54,12 @@ export default function ForgotPasswordPage({ onIrALogin }: ForgotPasswordPagePro
   }
 
   return (
-    <div className="flex flex-col gap-6">
-
-      {/* Encabezado con logo */}
-      <div className="flex flex-col items-center gap-4">
-        <Logo className="h-8 w-auto" />
-      </div>
-
+    <div className="flex flex-col gap-9">
       {!enviado ? (
         /* ── Estado inicial: formulario de solicitud ── */
         <>
           {/* Ícono y títulos */}
-          <div className="flex flex-col items-center gap-3 text-center">
-            <div className="w-14 h-14 rounded-full bg-[#946ed9]/15 border border-[#946ed9]/30 flex items-center justify-center">
-              <Mail className="w-6 h-6 text-[#946ed9]" />
-            </div>
+          <div className="flex flex-col items-start gap-9">
             <div>
               <h2
                 className="text-2xl font-extrabold text-[#f0eefa]"
@@ -84,7 +67,7 @@ export default function ForgotPasswordPage({ onIrALogin }: ForgotPasswordPagePro
               >
                 ¿Olvidaste tu contraseña?
               </h2>
-              <p className="text-sm text-[#8b82a8] mt-1 max-w-xs mx-auto">
+              <p className="text-sm text-[#8b82a8] mt-3 max-w-xs">
                 Ingresa tu email y te enviaremos las instrucciones para recuperar el acceso.
               </p>
             </div>
@@ -108,18 +91,17 @@ export default function ForgotPasswordPage({ onIrALogin }: ForgotPasswordPagePro
           </form>
 
           {/* Enlace para volver al login */}
-          <button
-            type="button"
-            onClick={onIrALogin}
-            className="flex items-center justify-center gap-1.5 text-sm text-[#8b82a8] hover:text-[#f0eefa] transition-colors mx-auto"
+          <Link
+            to="/iniciar-sesion"
+            className="flex items-center gap-1.5 text-sm text-[#8b82a8] hover:text-[#f0eefa] transition-colors mx-auto"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio de sesión
-          </button>
+          </Link>
         </>
       ) : (
         /* ── Estado de éxito: confirmación de envío ── */
-        <div className="flex flex-col items-center gap-5 text-center py-4">
+        <div className="flex flex-col items-center gap-9 text-center py-4">
           {/* Ícono de éxito */}
           <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
             <CheckCircle className="w-7 h-7 text-emerald-400" />
@@ -157,14 +139,13 @@ export default function ForgotPasswordPage({ onIrALogin }: ForgotPasswordPagePro
           <div className="h-px w-full bg-[#2a2140]" />
 
           {/* Volver al login */}
-          <button
-            type="button"
-            onClick={onIrALogin}
+          <Link
+            to="/iniciar-sesion"
             className="flex items-center gap-1.5 text-sm text-[#8b82a8] hover:text-[#f0eefa] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio de sesión
-          </button>
+          </Link>
         </div>
       )}
     </div>
