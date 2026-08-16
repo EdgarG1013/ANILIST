@@ -4,6 +4,7 @@ import HomePage from "./pages/landing/HomePage";
 import IniciarSesionPage from "./pages/autenticacion/IniciarSesionPage";
 import RegistroPage from "./pages/autenticacion/RegistroPage";
 import RecuperacionPasswordPage from "./pages/autenticacion/RecuperacionPasswordPage";
+import AnimeDetalladoPage from "./pages/anime/AnimeDetalladoPage";
 
 // ─── Definición centralizada de rutas ─────────────────────────────────────────
 // Agrega aquí las rutas futuras del proyecto (detalle de anime/manga, etc.)
@@ -20,4 +21,7 @@ export const router = createBrowserRouter([
   { path: "/iniciar-sesion", element: <IniciarSesionPage /> },
   { path: "/registro", element: <RegistroPage /> },
   { path: "/recuperar-password", element: <RecuperacionPasswordPage /> },
+
+  // Páginas de detalle de anime/manga — a pantalla completa, sin Navbar/Footer
+  { path: "/anime/:id", element: <AnimeDetalladoPage /> },
 ]);
