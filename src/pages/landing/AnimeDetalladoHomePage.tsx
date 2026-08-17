@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, Tv } from "lucide-react";
-import { obtenerDetalle } from "../../api/animeDetail";
+import { obtenerDetalleApi, type AnimeDetalle } from "../../api/animeDetail";
 import AnimeHeroBanner from "../../components/anime/AnimeHeroBanner";
 import AnimeSynopsis from "../../components/anime/AnimeSynopsis";
 import AnimeTrailer from "../../components/anime/AnimeTrailer";
@@ -13,14 +14,35 @@ export default function AnimeDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const anime = obtenerDetalle(Number(id));
+  const [anime, setAnime] = useState<AnimeDetalle | null>(null);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    let vivo = true;
+    setCargando(true);
+    obtenerDetalleApi(Number(id))
+      .then(d => vivo && setAnime(d))
+      .catch(() => vivo && setAnime(null))
+      .finally(() => vivo && setCargando(false));
+    return () => { vivo = false; };
+  }, [id]);
 
   const handleVolver = () => {
     if (window.history.length > 1) navigate(-1);
     else navigate("/");
   };
 
-  // Anime no encontrado (id inválido o sin datos hardcodeados aún)
+  if (cargando) {
+    return (
+      <main className="min-h-screen bg-background">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-20 text-center">
+          <p className="text-muted-foreground animate-pulse">Cargando detalles…</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Anime no encontrado (id inválido o sin datos)
   if (!anime) {
     return (
       <main className="min-h-screen bg-background">

@@ -1,10 +1,13 @@
 // ─── Cliente de la API pública Jikan (v4) ─────────────────────────────────────
 // Usado por el panel de usuario para el catálogo de anime y manga.
-// Si Jikan no responde, cae a un catálogo local de respaldo (catalogoLocal).
+// Nota: usa el endpoint de Tenrai (https://api.tenrai.org/v1), un mirror de la
+// API de Jikan con la misma forma de respuestas, porque api.jikan.moe está
+// devolviendo 504 (caída de MyAnimeList) y será descontinuado en oct 2026.
+// Si la API no responde, cae a un catálogo local de respaldo (catalogoLocal).
 
 import { catalogoLocal } from "./catalogoLocal";
 
-const BASE = "https://api.jikan.moe/v4";
+const BASE = "https://api.tenrai.org/v1";
 
 export type Medio = "anime" | "manga";
 
@@ -123,22 +126,38 @@ function normalizar(e: JikanEntrada, medio: Medio): CatalogoItem {
   };
 }
 
-// Jikan limita a ~3 peticiones por segundo: encolamos y reintentamos ante 429.
+// Jikan limita a ~3 peticiones por segundo: encolamos y reintentamos ante 429/5xx.
 let cola: Promise<unknown> = Promise.resolve();
 const esperar = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-async function pedir(url: string, intentos = 3): Promise<Response> {
-  const ejecutar = async (): Promise<Response> => {
-    for (let i = 0; i < intentos; i++) {
-      const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
-      if (res.status === 429 || res.status === 504) {
-        await esperar(900 * (i + 1));
+const MAX_INTENTOS = 3;
+const REINTENTABLES = [429, 503, 504];
+
+/**
+ * Realiza una petición con límite de ritmo y reintentos con backoff.
+ * Devuelve la respuesta JSON tipada o lanza si la API no responde tras los
+ * reintentos. Expuesto para que otras partes de la app (detalle de anime,
+ * etc.) reutilicen la misma cola de rate-limit.
+ */
+export async function pedirJikan<T>(endpoint: string): Promise<T> {
+  const ejecutar = async (): Promise<T> => {
+    for (let i = 0; i < MAX_INTENTOS; i++) {
+      const res = await fetch(`${BASE}${endpoint}`, {
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (REINTENTABLES.includes(res.status) && i < MAX_INTENTOS - 1) {
+        await esperar(1000 * Math.pow(2, i)); // 1s, 2s
         continue;
       }
-      return res;
+
+      if (!res.ok) throw new Error(`Jikan respondió ${res.status}`);
+      return (await res.json()) as T;
     }
-    return fetch(url, { signal: AbortSignal.timeout(12000) });
+
+    throw new Error("La API no respondió tras los reintentos");
   };
+
   const siguiente = cola.then(ejecutar);
   cola = siguiente.then(() => esperar(400), () => esperar(400));
   return siguiente;
@@ -167,12 +186,10 @@ export async function buscarCatalogo(f: CatalogoFiltros): Promise<CatalogoRespue
   }
 
   try {
-    const res = await pedir(`${BASE}/${f.medio}?${p.toString()}`);
-    if (!res.ok) throw new Error(`Jikan respondió ${res.status}`);
-    const json = (await res.json()) as {
+    const json = await pedirJikan<{
       data: JikanEntrada[];
       pagination?: { current_page?: number; last_visible_page?: number; items?: { total?: number } };
-    };
+    }>(`/${f.medio}?${p.toString()}`);
 
     return {
       items: (json.data || []).map(e => normalizar(e, f.medio)),

@@ -1,4 +1,5 @@
 import { CalendarClock, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { PROXIMAMENTE } from "../../api/anime";
 import { TipoBadge } from "./badges";
 
@@ -27,7 +28,7 @@ export default function ProximosSection() {
       {/* Grilla responsiva: 2 cols móvil → 3 tablet → 4 desktop */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         {PROXIMAMENTE.map(anime => (
-          <a key={anime.id} href="#" className="block group">
+          <Link key={anime.id} to={`/anime/${anime.id}`} className="block group">
             <div className="bg-[#110f1a] rounded-2xl overflow-hidden border border-[#2a2140] group-hover:border-[#946ed9]/40 transition-all duration-200 group-hover:-translate-y-0.5 shadow-lg">
               {/* Portada con badge de tipo superpuesto */}
               <div className="relative aspect-[2/3] bg-[#1c1928]">
@@ -49,7 +50,7 @@ export default function ProximosSection() {
                 </p>
               </div>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </section>

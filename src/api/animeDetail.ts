@@ -2,6 +2,7 @@
 // Reutiliza AnimeCard (definido en ./anime) para las secciones relacionadas.
 
 import type { AnimeCard } from "./anime";
+import { pedirJikan } from "./jikanClient";
 
 /** Personaje del anime con su actor de doblaje japonés */
 export interface Personaje {
@@ -167,4 +168,147 @@ export const DETALLE: Record<number, AnimeDetalle> = {
 /** Devuelve los detalles de un anime por id, o undefined si no existe. */
 export function obtenerDetalle(id: number): AnimeDetalle | undefined {
   return DETALLE[id];
+}
+
+// ─── Detalle en vivo desde la API (Tenrai / Jikan v4) ────────────────────────
+
+interface ApiNamed { mal_id: number; name: string; type?: string }
+
+interface ApiAnime {
+  mal_id: number;
+  title: string;
+  title_english?: string | null;
+  title_japanese?: string | null;
+  score?: number | null;
+  scored_by?: number | null;
+  rank?: number | null;
+  popularity?: number | null;
+  members?: number | null;
+  type?: string | null;
+  year?: number | null;
+  episodes?: number | null;
+  status?: string | null;
+  source?: string | null;
+  rating?: string | null;
+  duration?: string | null;
+  synopsis?: string | null;
+  images?: { jpg?: { large_image_url?: string; image_url?: string } };
+  trailer?: { youtube_id?: string | null };
+  aired?: { prop?: { from?: { year?: number | null } } };
+  studios?: ApiNamed[];
+  genres?: ApiNamed[];
+  themes?: ApiNamed[];
+  demographics?: ApiNamed[];
+  theme?: { openings?: string[]; endings?: string[] };
+}
+
+interface ApiCharacter {
+  character?: { mal_id?: number; name?: string; images?: { jpg?: { image_url?: string } } };
+  role?: string;
+  voice_actors?: { person?: { name?: string } }[];
+}
+
+interface ApiEpisode { mal_id?: number; title?: string; aired?: string | null }
+
+interface ApiRelation { relation?: string; entry?: { mal_id?: number; type?: string; name?: string; url?: string }[] }
+
+interface ApiRecommendation { entry?: { mal_id?: number; images?: { jpg?: { large_image_url?: string; image_url?: string } }; title?: string } }
+
+function mapearDetalle(a: ApiAnime): AnimeDetalle {
+  const img = a.images?.jpg?.large_image_url || a.images?.jpg?.image_url || "";
+  const generos = [
+    ...(a.genres || []),
+    ...(a.themes || []),
+    ...(a.demographics || []),
+  ].map(g => g.name);
+
+  return {
+    id: a.mal_id,
+    titulo: a.title,
+    tituloIngles: a.title_english ?? undefined,
+    score: a.score ?? 0,
+    votos: a.scored_by ?? 0,
+    rank: a.rank ?? 0,
+    popularidad: a.popularity ?? 0,
+    tipo: a.type ?? "TV",
+    year: a.year ?? a.aired?.prop?.from?.year ?? 0,
+    estudio: (a.studios || [])[0]?.name ?? "",
+    eps: a.episodes ?? 0,
+    estado: a.status ?? "",
+    fuente: a.source ?? "",
+    clasificacion: a.rating ?? "",
+    duracion: a.duration ?? "",
+    generos,
+    sinopsis: a.synopsis ?? "Sin sinopsis disponible.",
+    img,
+    banner: img,
+    trailerYtId: a.trailer?.youtube_id ?? undefined,
+    openings: a.theme?.openings ?? [],
+    endings: a.theme?.endings ?? [],
+    personajes: [],
+    episodios: [],
+    relacionados: [],
+    similares: [],
+  };
+}
+
+/**
+ * Obtiene los detalles completos de un anime desde la API.
+ * Consulta /full, /characters, /episodes, /relations y /recommendations.
+ * Si la API falla, cae a los datos hardcodeados (si existen) o lanza.
+ */
+export async function obtenerDetalleApi(id: number): Promise<AnimeDetalle> {
+  try {
+    const [{ data: base }, { data: personajes }, { data: episodios }, { data: relaciones }, { data: recomendaciones }] =
+      await Promise.all([
+        pedirJikan<{ data: ApiAnime }>(`/anime/${id}/full`),
+        pedirJikan<{ data: ApiCharacter[] }>(`/anime/${id}/characters`),
+        pedirJikan<{ data: ApiEpisode[] }>(`/anime/${id}/episodes`),
+        pedirJikan<{ data: ApiRelation[] }>(`/anime/${id}/relations`),
+        pedirJikan<{ data: ApiRecommendation[] }>(`/anime/${id}/recommendations`),
+      ]);
+
+    const detalle = mapearDetalle(base);
+
+    detalle.personajes = (personajes || []).slice(0, 12).map(c => ({
+      nombre: c.character?.name ?? "Personaje",
+      rol: c.role ?? "",
+      img: c.character?.images?.jpg?.image_url,
+      seiyuu: c.voice_actors?.[0]?.person?.name,
+    }));
+
+    detalle.episodios = (episodios || []).map(ep => ({
+      num: ep.mal_id ?? 0,
+      titulo: ep.title ?? `Episodio ${ep.mal_id ?? ""}`,
+      fecha: ep.aired ?? "",
+    }));
+
+    detalle.relacionados = (relaciones || []).flatMap(r =>
+      (r.entry || [])
+        .filter(e => e.type === "anime")
+        .map(e => ({
+          id: e.mal_id ?? 0,
+          title: e.name ?? "",
+          year: 0,
+          score: 0,
+          type: "TV",
+          img: "",
+        })),
+    );
+
+    detalle.similares = (recomendaciones || []).slice(0, 8).map(r => ({
+      id: r.entry?.mal_id ?? 0,
+      title: r.entry?.title ?? "",
+      year: 0,
+      score: 0,
+      type: "TV",
+      img: r.entry?.images?.jpg?.large_image_url || r.entry?.images?.jpg?.image_url || "",
+    }));
+
+    return detalle;
+  } catch {
+    const local = DETALLE[id];
+    if (local) return local;
+    throw new Error("No se pudieron cargar los detalles del anime");
+  }
 }

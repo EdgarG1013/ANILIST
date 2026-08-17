@@ -27,7 +27,7 @@ export default function Navbar() {
       <div className="flex items-center max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 h-16 gap-4">
 
         {/* Logotipo */}
-        <a href="#" className="shrink-0 flex items-center" aria-label="ANILIST — Ir al inicio">
+        <a href="/" className="shrink-0 flex items-center" aria-label="ANILIST — Ir al inicio">
           <img src={logo} alt="ANILIST" className="h-6 w-auto" />
         </a>
 
@@ -36,7 +36,7 @@ export default function Navbar() {
           {ENLACES_NAV.map(enlace => (
             <a
               key={enlace}
-              href="#"
+              href="/"
               className="text-[#8b82a8] hover:text-[#f0eefa] text-sm px-3 py-1.5 rounded-lg transition-colors duration-150"
             >
               {enlace}
@@ -115,7 +115,7 @@ export default function Navbar() {
           {ENLACES_NAV.map(enlace => (
             <a
               key={enlace}
-              href="#"
+              href="/"
               className="block text-[#8b82a8] hover:text-[#f0eefa] text-sm px-3 py-2 rounded-lg transition-colors"
             >
               {enlace}

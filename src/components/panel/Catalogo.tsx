@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Search, Check, Plus, Loader2, AlertCircle } from "lucide-react";
 import {
   buscarCatalogo, TIPOS, ESTADOS, GENEROS, ANIOS, LETRAS, ORDENES,
@@ -215,20 +216,23 @@ export default function Catalogo({ medio, titulo }: { medio: Medio; titulo: stri
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
           {items.map(item => {
             const guardado = enBiblioteca(medio, item.id);
+            const rutaDetalle = medio === "anime" ? `/panel/anime/${item.id}` : `#`;
             return (
               <li key={item.id}>
                 <article className="h-full bg-[#110f1a] rounded-2xl overflow-hidden border border-[#2a2140] hover:border-[#946ed9]/40 transition-colors flex flex-col">
-                  <div className="relative aspect-[2/3] bg-[#1c1928]">
-                    {item.img && <img src={item.img} alt={`Portada de ${item.title}`} loading="lazy" className="w-full h-full object-cover" />}
+                  <Link to={rutaDetalle} className="block relative aspect-[2/3] bg-[#1c1928] group">
+                    {item.img && <img src={item.img} alt={`Portada de ${item.title}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />}
                     <div className="absolute top-2 right-2"><TipoBadge tipo={item.type} /></div>
                     {item.score != null && (
                       <div className="absolute top-2 left-2"><PuntuacionBadge score={item.score} /></div>
                     )}
-                  </div>
+                  </Link>
                   <div className="p-3 flex flex-col gap-2 flex-1">
-                    <h2 className="text-[13px] font-semibold leading-snug line-clamp-2" style={{ fontFamily: "'Oxanium', sans-serif" }}>
-                      {item.title}
-                    </h2>
+                    <Link to={rutaDetalle}>
+                      <h2 className="text-[13px] font-semibold leading-snug line-clamp-2 hover:text-[#b08ee8] transition-colors" style={{ fontFamily: "'Oxanium', sans-serif" }}>
+                        {item.title}
+                      </h2>
+                    </Link>
                     <p className="text-xs text-[#8b82a8]">{item.year ?? "—"}</p>
                     <button
                       onClick={() => agregar(item, medio)}

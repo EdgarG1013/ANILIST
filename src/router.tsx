@@ -3,12 +3,14 @@ import App from "./App";
 // ─── Paginas del home ───────────────────────────────────────────────
 import HomePage from "./pages/landing/HomePage";
 import AnimeDetalladoHomePage from "./pages/landing/AnimeDetalladoHomePage";
+import MangaDetalladoHomePage from "./pages/landing/MangaDetalladoHomePage";
 // ─── Paginas de autenticación ───────────────────────────────────────
 import IniciarSesionPage from "./pages/autenticacion/IniciarSesionPage";
 import RegistroPage from "./pages/autenticacion/RegistroPage";
 import RecuperacionPasswordPage from "./pages/autenticacion/RecuperacionPasswordPage";
 // ─── Paginas del panel de usuario ─────────────────────────────────
 import AnimeDetalladoPage from "./pages/anime/AnimeDetalladoPage";
+import MangaDetalladoPage from "./pages/manga/MangaDetalladoPage";
 import PanelLayout from "./components/panel/PanelLayout";
 import InicioPage from "./pages/panel/InicioPage";
 import CatalogoAnimePage from "./pages/panel/CatalogoAnimePage";
@@ -28,6 +30,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "anime/:id", element: <AnimeDetalladoHomePage /> },
+      { path: "manga/:id", element: <MangaDetalladoHomePage /> },
     ],
   },
   // Páginas de autenticación — a pantalla completa, sin Navbar/Footer
@@ -48,6 +51,7 @@ export const router = createBrowserRouter([
       { path: "grupos", element: <GruposPage /> },
       { path: "configuracion", element: <ConfiguracionPage /> },
       { path: "anime/:id", element: <AnimeDetalladoPage /> },
+      { path: "manga/:id", element: <MangaDetalladoPage /> },
     ],
   },
 

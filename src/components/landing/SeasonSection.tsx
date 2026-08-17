@@ -1,4 +1,5 @@
 import { Flame, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { TEMPORADA } from "../../api/anime";
 import { TipoBadge, PuntuacionBadge } from "./badges";
 
@@ -27,7 +28,7 @@ export default function SeasonSection() {
       {/* Grilla responsiva: 2 cols móvil → 3 tablet → 4 desktop */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         {TEMPORADA.map(anime => (
-          <a key={anime.id} href="#" className="block group">
+          <Link key={anime.id} to={`/anime/${anime.id}`} className="block group">
             <div className="bg-[#110f1a] rounded-2xl overflow-hidden border border-[#2a2140] group-hover:border-[#946ed9]/40 transition-all duration-200 group-hover:-translate-y-0.5 shadow-lg">
               {/* Portada con badges superpuestos */}
               <div className="relative aspect-[2/3] bg-[#1c1928]">
@@ -50,7 +51,7 @@ export default function SeasonSection() {
                 <p className="text-[#8b82a8] text-xs">{anime.year}</p>
               </div>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </section>

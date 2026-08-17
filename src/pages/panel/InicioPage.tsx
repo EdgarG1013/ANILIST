@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Newspaper, CalendarClock, Sparkles, BookOpen, ChevronRight } from "lucide-react";
-import { buscarCatalogo, type CatalogoItem } from "../../api/jikanClient";
+import { buscarCatalogo, type CatalogoItem, type Medio } from "../../api/jikanClient";
 import { useBiblioteca } from "../../store/biblioteca";
 import { TipoBadge, PuntuacionBadge } from "../../components/landing/badges";
 
@@ -14,8 +14,8 @@ const NOTICIAS = [
 ];
 
 function Fila({
-  titulo, Icono, items, cargando,
-}: { titulo: string; Icono: typeof Sparkles; items: CatalogoItem[]; cargando: boolean }) {
+  titulo, Icono, items, cargando, medio,
+}: { titulo: string; Icono: typeof Sparkles; items: CatalogoItem[]; cargando: boolean; medio: Medio }) {
   return (
     <section className="mb-10">
       <h2 className="flex items-center gap-2 text-lg font-semibold tracking-wide mb-4" style={{ fontFamily: "'Oxanium', sans-serif" }}>
@@ -30,16 +30,21 @@ function Fila({
       ) : (
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {items.slice(0, 5).map(item => (
-            <li key={item.id} className="bg-[#110f1a] border border-[#2a2140] rounded-2xl overflow-hidden hover:border-[#946ed9]/40 transition-colors">
-              <div className="relative aspect-[2/3] bg-[#1c1928]">
-                {item.img && <img src={item.img} alt={`Portada de ${item.title}`} loading="lazy" className="w-full h-full object-cover" />}
-                <div className="absolute top-2 right-2"><TipoBadge tipo={item.type} /></div>
-                {item.score != null && <div className="absolute top-2 left-2"><PuntuacionBadge score={item.score} /></div>}
-              </div>
-              <div className="p-3">
-                <h3 className="text-[13px] font-semibold line-clamp-2" style={{ fontFamily: "'Oxanium', sans-serif" }}>{item.title}</h3>
-                <p className="text-xs text-[#8b82a8] mt-1">{item.year ?? "—"}</p>
-              </div>
+            <li key={item.id}>
+              <Link
+                to={medio === "anime" ? `/panel/anime/${item.id}` : "#"}
+                className="block bg-[#110f1a] border border-[#2a2140] rounded-2xl overflow-hidden hover:border-[#946ed9]/40 transition-colors"
+              >
+                <div className="relative aspect-[2/3] bg-[#1c1928]">
+                  {item.img && <img src={item.img} alt={`Portada de ${item.title}`} loading="lazy" className="w-full h-full object-cover" />}
+                  <div className="absolute top-2 right-2"><TipoBadge tipo={item.type} /></div>
+                  {item.score != null && <div className="absolute top-2 left-2"><PuntuacionBadge score={item.score} /></div>}
+                </div>
+                <div className="p-3">
+                  <h3 className="text-[13px] font-semibold line-clamp-2" style={{ fontFamily: "'Oxanium', sans-serif" }}>{item.title}</h3>
+                  <p className="text-xs text-[#8b82a8] mt-1">{item.year ?? "—"}</p>
+                </div>
+              </Link>
             </li>
           ))}
         </ul>
@@ -112,9 +117,9 @@ export default function InicioPage() {
         </ul>
       </section>
 
-      <Fila titulo="Próximos estrenos" Icono={CalendarClock} items={proximos} cargando={cargando} />
-      <Fila titulo="Anime recomendado" Icono={Sparkles} items={animes} cargando={cargando} />
-      <Fila titulo="Manga recomendado" Icono={BookOpen} items={mangas} cargando={cargando} />
+      <Fila titulo="Próximos estrenos" Icono={CalendarClock} items={proximos} cargando={cargando} medio="anime" />
+      <Fila titulo="Anime recomendado" Icono={Sparkles} items={animes} cargando={cargando} medio="anime" />
+      <Fila titulo="Manga recomendado" Icono={BookOpen} items={mangas} cargando={cargando} medio="manga" />
     </div>
   );
 }
