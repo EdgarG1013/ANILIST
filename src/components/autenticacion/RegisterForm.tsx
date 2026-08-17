@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Field, PasswordField, Checkbox, Divider, BtnPrimary } from "../ui/FormFields";
+import { useAuth } from "../../store/auth";
 
 // ─── Formulario de registro (lógica) ─────────────────────────────────────────
 
@@ -61,6 +62,7 @@ const COLORES_SEGURIDAD: Record<number, string> = {
 
 export default function RegisterForm() {
   const navigate = useNavigate();
+  const { iniciarSesion } = useAuth();
   const [usuario, setUsuario] = useState("");
   const [email, setEmail] = useState("");
   const [contrasena, setContrasena] = useState("");
@@ -81,6 +83,7 @@ export default function RegisterForm() {
     setCargando(true);
     setTimeout(() => {
       setCargando(false);
+      iniciarSesion({ nombre: usuario, correo: email, avatar: "" });
       navigate("/");
     }, 900);
   }
