@@ -32,7 +32,7 @@ export default function AnimeDetailsPage() {
             No tenemos datos para el anime que buscas. Prueba con otro título.
           </p>
           <button
-            onClick={() => navigate("/panel/")}
+            onClick={() => navigate("/")}
             className="h-10 px-5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
             style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)" }}
           >
@@ -43,7 +43,7 @@ export default function AnimeDetailsPage() {
     );
   }
 
-  const handleSeleccionar = (nuevoId: number) => navigate(`/panel/anime/${nuevoId}`);
+  const handleSeleccionar = (nuevoId: number) => navigate(`/anime/${nuevoId}`);
 
   return (
     <div className="min-h-screen bg-background">
