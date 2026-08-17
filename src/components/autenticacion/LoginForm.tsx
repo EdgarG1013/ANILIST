@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Field, PasswordField, Checkbox, Divider, BtnPrimary } from "../ui/FormFields";
+import { useAuth } from "../../store/auth";
 
 // ─── Formulario de inicio de sesión (lógica) ─────────────────────────────────
 
@@ -17,6 +18,7 @@ function validar(identificador: string, contrasena: string) {
 
 export default function LoginForm() {
   const navigate = useNavigate();
+  const { iniciarSesion } = useAuth();
   const [identificador, setIdentificador] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [recuerdame, setRecuerdame] = useState(false);
@@ -33,7 +35,12 @@ export default function LoginForm() {
     setCargando(true);
     setTimeout(() => {
       setCargando(false);
-      navigate("/");
+      iniciarSesion({
+        nombre: identificador,
+        correo: identificador.includes("@") ? identificador : `${identificador}@anilist.app`,
+        avatar: "",
+      });
+      navigate("/panel");
     }, 900);
   }
 
