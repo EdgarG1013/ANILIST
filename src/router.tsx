@@ -1,17 +1,22 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
+// ─── Paginas del home ───────────────────────────────────────────────
 import HomePage from "./pages/landing/HomePage";
+import AnimeDetalladoHomePage from "./pages/landing/AnimeDetalladoHomePage";
+// ─── Paginas de autenticación ───────────────────────────────────────
 import IniciarSesionPage from "./pages/autenticacion/IniciarSesionPage";
 import RegistroPage from "./pages/autenticacion/RegistroPage";
 import RecuperacionPasswordPage from "./pages/autenticacion/RecuperacionPasswordPage";
+// ─── Paginas del panel de usuario ─────────────────────────────────
 import AnimeDetalladoPage from "./pages/anime/AnimeDetalladoPage";
 import PanelLayout from "./components/panel/PanelLayout";
 import InicioPage from "./pages/panel/InicioPage";
-import AnimeDetalladoHomePage from "./pages/landing/AnimeDetalladoHomePage";
 import CatalogoAnimePage from "./pages/panel/CatalogoAnimePage";
 import CatalogoMangaPage from "./pages/panel/CatalogoMangaPage";
 import ListasAnimePage from "./pages/panel/ListasAnimePage";
 import ListasMangaPage from "./pages/panel/ListasMangaPage";
+import GruposPage from "./pages/panel/GruposPage";
+import ConfiguracionPage from "./pages/panel/ConfiguracionPage";
 
 // ─── Definición centralizada de rutas ─────────────────────────────────────────
 // Agrega aquí las rutas futuras del proyecto (detalle de anime/manga, etc.)
@@ -40,6 +45,8 @@ export const router = createBrowserRouter([
       { path: "catalogo-manga", element: <CatalogoMangaPage /> },
       { path: "listas-anime", element: <ListasAnimePage /> },
       { path: "listas-manga", element: <ListasMangaPage /> },
+      { path: "grupos", element: <GruposPage /> },
+      { path: "configuracion", element: <ConfiguracionPage /> },
       { path: "anime/:id", element: <AnimeDetalladoPage /> },
     ],
   },
