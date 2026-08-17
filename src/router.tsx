@@ -7,6 +7,8 @@ import RecuperacionPasswordPage from "./pages/autenticacion/RecuperacionPassword
 import AnimeDetalladoPage from "./pages/anime/AnimeDetalladoPage";
 import PanelLayout from "./components/panel/PanelLayout";
 import InicioPage from "./pages/panel/InicioPage";
+import CatalogoAnimePage from "./pages/panel/CatalogoAnimePage";
+import CatalogoMangaPage from "./pages/panel/CatalogoMangaPage";
 
 // ─── Definición centralizada de rutas ─────────────────────────────────────────
 // Agrega aquí las rutas futuras del proyecto (detalle de anime/manga, etc.)
@@ -30,6 +32,8 @@ export const router = createBrowserRouter([
     element: <PanelLayout />,
     children: [
       { index: true, element: <InicioPage /> },
+      { path: "catalogo-anime", element: <CatalogoAnimePage /> },
+      { path: "catalogo-manga", element: <CatalogoMangaPage /> },
     ],
   },
 
