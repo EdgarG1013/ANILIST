@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Heart, Trash2, GripVertical, Minus, Plus } from "lucide-react";
 import type { Medio } from "../../api/jikanClient";
 import {
@@ -152,9 +153,13 @@ export default function Listas({ medio, titulo }: { medio: Medio; titulo: string
                 />
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold truncate" style={{ fontFamily: "'Oxanium', sans-serif" }}>
+                  <Link
+                    to={e.medio === "anime" ? `/panel/anime/${e.id}` : `/panel/manga/${e.id}`}
+                    className="text-sm font-semibold truncate block hover:text-[#b08ee8] transition-colors"
+                    style={{ fontFamily: "'Oxanium', sans-serif" }}
+                  >
                     {e.titulo}
-                  </p>
+                  </Link>
                   <p className="text-xs text-[#8b82a8]">
                     {e.tipo} · guardado el {new Date(e.agregado).toLocaleDateString("es")}
                   </p>

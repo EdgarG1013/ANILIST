@@ -101,7 +101,7 @@ export default function HeroSection() {
 
           {/* Botón de acción */}
           <a
-            href="#"
+            href="/"
             className="inline-flex items-center gap-2 h-11 px-5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
             style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)" }}
           >

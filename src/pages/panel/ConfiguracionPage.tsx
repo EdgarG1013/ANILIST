@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
-import { Upload, Download, User, KeyRound, FileJson, FileText } from "lucide-react";
+import { Upload, Download, User, KeyRound, FileJson, FileText, ShieldAlert } from "lucide-react";
 import { useBiblioteca, type Entrada, type Grupo } from "../../store/biblioteca";
 
 // ─── Configuración de cuenta, importación y exportación ──────────────────────
 
 export default function ConfiguracionPage() {
-  const { perfil, setPerfil, entradas, grupos, reemplazarTodo } = useBiblioteca();
+  const { perfil, setPerfil, entradas, grupos, reemplazarTodo, preferencias, setPreferencias } = useBiblioteca();
   const [nombre, setNombre] = useState(perfil.nombre);
   const [correo, setCorreo] = useState(perfil.correo);
   const [mensaje, setMensaje] = useState<string | null>(null);
@@ -123,6 +123,30 @@ export default function ConfiguracionPage() {
         >
           Guardar cambios
         </button>
+      </section>
+
+      {/* Contenido */}
+      <section className="bg-[#110f1a] border border-[#2a2140] rounded-2xl p-5 mb-5">
+        <h2 className="text-base font-semibold mb-1 flex items-center gap-2" style={{ fontFamily: "'Oxanium', sans-serif" }}>
+          <ShieldAlert className="w-4 h-4 text-[#946ed9]" /> Filtro de contenido
+        </h2>
+        <p className="text-sm text-[#8b82a8] mb-4">
+          Controla qué títulos aparecen en los buscadores de anime y manga del catálogo.
+        </p>
+        <label className="flex items-start gap-3 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={!preferencias.sfw}
+            onChange={e => setPreferencias({ sfw: !e.target.checked })}
+            className="mt-1 w-4 h-4 accent-[#946ed9]"
+          />
+          <span>
+            <span className="block text-sm font-medium text-[#f0eefa]">Mostrar títulos para adultos</span>
+            <span className="block text-xs text-[#8b82a8] mt-0.5">
+              Al activarlo se elimina el filtro SFW de los buscadores y se muestran todos los títulos.
+            </span>
+          </span>
+        </label>
       </section>
 
       {/* Contraseña */}

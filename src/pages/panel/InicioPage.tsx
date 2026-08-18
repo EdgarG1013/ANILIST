@@ -1,17 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Newspaper, CalendarClock, Sparkles, BookOpen, ChevronRight } from "lucide-react";
-import { buscarCatalogo, type CatalogoItem, type Medio } from "../../api/jikanClient";
+import { Newspaper, CalendarClock, Sparkles, BookOpen, ExternalLink } from "lucide-react";
+import { buscarCatalogo, obtenerNoticias, type CatalogoItem, type Medio, type Noticia } from "../../api/jikanClient";
 import { useBiblioteca } from "../../store/biblioteca";
 import { TipoBadge, PuntuacionBadge } from "../../components/landing/badges";
 
 // ─── Inicio del panel: noticias, próximos estrenos y recomendados ────────────
-
-const NOTICIAS = [
-  { titulo: "La temporada de verano suma 12 estrenos confirmados", fecha: "hace 2 h", fuente: "ANILIST Noticias" },
-  { titulo: "Nuevo arco del manga más leído del mes llega a su clímax", fecha: "hace 6 h", fuente: "Editorial" },
-  { titulo: "Anuncian adaptación animada de una novela ligera premiada", fecha: "ayer", fuente: "Industria" },
-];
 
 function Fila({
   titulo, Icono, items, cargando, medio,
@@ -32,7 +26,7 @@ function Fila({
           {items.slice(0, 5).map(item => (
             <li key={item.id}>
               <Link
-                to={medio === "anime" ? `/panel/anime/${item.id}` : "#"}
+                to={medio === "anime" ? `/panel/anime/${item.id}` : `/panel/manga/${item.id}`}
                 className="block bg-[#110f1a] border border-[#2a2140] rounded-2xl overflow-hidden hover:border-[#946ed9]/40 transition-colors"
               >
                 <div className="relative aspect-[2/3] bg-[#1c1928]">
@@ -58,6 +52,7 @@ export default function InicioPage() {
   const [proximos, setProximos] = useState<CatalogoItem[]>([]);
   const [animes, setAnimes] = useState<CatalogoItem[]>([]);
   const [mangas, setMangas] = useState<CatalogoItem[]>([]);
+  const [noticias, setNoticias] = useState<Noticia[]>([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
@@ -66,15 +61,31 @@ export default function InicioPage() {
       buscarCatalogo({ medio: "anime", estado: "upcoming", orden: "popularity:asc" }),
       buscarCatalogo({ medio: "anime", orden: "score:desc" }),
       buscarCatalogo({ medio: "manga", orden: "score:desc" }),
-    ]).then(([p, a, m]) => {
+      obtenerNoticias(5),
+    ]).then(([p, a, m, n]) => {
       if (!vivo) return;
       if (p.status === "fulfilled") setProximos(p.value.items);
       if (a.status === "fulfilled") setAnimes(a.value.items);
       if (m.status === "fulfilled") setMangas(m.value.items);
+      if (n.status === "fulfilled") setNoticias(n.value);
       setCargando(false);
     });
     return () => { vivo = false; };
   }, []);
+
+  function formatearFecha(iso: string): string {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    const ahora = Date.now();
+    const diffMin = Math.floor((ahora - d.getTime()) / 60000);
+    if (diffMin < 60) return diffMin <= 1 ? "hace 1 min" : `hace ${diffMin} min`;
+    const diffHoras = Math.floor(diffMin / 60);
+    if (diffHoras < 24) return `hace ${diffHoras} h`;
+    const diffDias = Math.floor(diffHoras / 24);
+    if (diffDias < 7) return `hace ${diffDias} d`;
+    return d.toLocaleDateString("es");
+  }
 
   const stats = [
     { etiqueta: "Animes guardados", valor: entradas.filter(e => e.medio === "anime").length, a: "/panel/listas-anime" },
@@ -105,15 +116,35 @@ export default function InicioPage() {
           <Newspaper className="w-5 h-5 text-[#946ed9]" /> Noticias
         </h2>
         <ul className="bg-[#110f1a] border border-[#2a2140] rounded-2xl divide-y divide-[#2a2140]">
-          {NOTICIAS.map(n => (
-            <li key={n.titulo} className="p-4 flex items-center justify-between gap-3 hover:bg-[#16141e] transition-colors">
-              <div className="min-w-0">
-                <p className="text-sm font-medium truncate">{n.titulo}</p>
-                <p className="text-xs text-[#8b82a8] mt-0.5">{n.fuente} · {n.fecha}</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-[#8b82a8] shrink-0" aria-hidden="true" />
+          {noticias.length === 0 ? (
+            <li className="p-4 text-sm text-[#8b82a8]">
+              {cargando ? "Cargando noticias…" : "No pudimos cargar las noticias."}
             </li>
-          ))}
+          ) : (
+            noticias.map(n => (
+              <li key={n.id}>
+                <a
+                  href={n.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 flex items-start gap-4 hover:bg-[#16141e] transition-colors group"
+                >
+                  {n.img && (
+                    <img src={n.img} alt="" loading="lazy" className="w-16 h-16 object-cover rounded-xl bg-[#1c1928] shrink-0" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium line-clamp-2 group-hover:text-[#b08ee8] transition-colors">
+                      {n.titulo}
+                    </p>
+                    <p className="text-xs text-[#8b82a8] mt-0.5">
+                      {n.fuente} · {formatearFecha(n.fecha)}
+                    </p>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-[#8b82a8] shrink-0 mt-1" aria-hidden="true" />
+                </a>
+              </li>
+            ))
+          )}
         </ul>
       </section>
 
