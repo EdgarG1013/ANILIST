@@ -1,4 +1,4 @@
-//import { } from "lucide-react";
+import { Link } from "react-router-dom";
 import logo from "../../assets/logo.svg";
 
 // ─── Columnas de enlaces del pie de página ────────────────────────────────────
@@ -6,19 +6,41 @@ import logo from "../../assets/logo.svg";
 const COLUMNAS = [
   {
     titulo: "Explorar",
-    enlaces: ["Inicio", "Más populares", "Temporada actual", "Próximos estrenos", "Top en emisión"],
+    enlaces: [
+      { etiqueta: "Inicio", ruta: "/" },
+      { etiqueta: "Más populares", ruta: "/explorar?type=popular" },
+      { etiqueta: "Temporada actual", ruta: "/explorar?type=season" },
+      { etiqueta: "Próximos estrenos", ruta: "/explorar?type=upcoming" },
+      { etiqueta: "Top en emisión", ruta: "/explorar?type=airing" },
+    ],
   },
   {
     titulo: "Géneros",
-    enlaces: ["Acción", "Romance", "Shounen", "Sci-Fi", "Fantasía"],
+    enlaces: [
+      { etiqueta: "Acción", ruta: "/explorar?type=genre&genre=1" },
+      { etiqueta: "Romance", ruta: "/explorar?type=genre&genre=22" },
+      { etiqueta: "Shounen", ruta: "/explorar?type=genre&genre=27" },
+      { etiqueta: "Sci-Fi", ruta: "/explorar?type=genre&genre=24" },
+      { etiqueta: "Fantasía", ruta: "/explorar?type=genre&genre=10" },
+    ],
   },
   {
     titulo: "Temporada 2026",
-    enlaces: ["Invierno", "Primavera", "Verano", "Otoño"],
+    enlaces: [
+      { etiqueta: "Invierno", ruta: "/explorar?type=season-archive&year=2026&season=winter" },
+      { etiqueta: "Primavera", ruta: "/explorar?type=season-archive&year=2026&season=spring" },
+      { etiqueta: "Verano", ruta: "/explorar?type=season-archive&year=2026&season=summer" },
+      { etiqueta: "Otoño", ruta: "/explorar?type=season-archive&year=2026&season=fall" },
+    ],
   },
   {
     titulo: "Formatos",
-    enlaces: ["ONAs", "OVAs", "Especiales", "Películas"],
+    enlaces: [
+      { etiqueta: "ONAs", ruta: "/explorar?type=ona" },
+      { etiqueta: "OVAs", ruta: "/explorar?type=ova" },
+      { etiqueta: "Especiales", ruta: "/explorar?type=special" },
+      { etiqueta: "Películas", ruta: "/explorar?type=movies" },
+    ],
   },
 ] as const;
 
@@ -32,9 +54,9 @@ export default function Footer() {
 
           {/* Marca e información general */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-2">
-            <a href="#" className="inline-block mb-4" aria-label="ANILIST">
+            <Link to="/" className="inline-block mb-4" aria-label="ANILIST">
               <img src={logo} alt="ANILIST" className="h-5 w-auto" />
-            </a>
+            </Link>
             <p className="text-sm leading-relaxed max-w-[260px] mb-4">
               Tu espacio personal para rastrear, organizar y descubrir anime y manga.
               Ten el control de todo lo que ves y lees.
@@ -49,10 +71,10 @@ export default function Footer() {
               </h4>
               <ul className="space-y-2.5">
                 {col.enlaces.map(enlace => (
-                  <li key={enlace}>
-                    <a href="#" className="text-sm hover:text-[#f0eefa] transition-colors">
-                      {enlace}
-                    </a>
+                  <li key={enlace.etiqueta}>
+                    <Link to={enlace.ruta} className="text-sm hover:text-[#f0eefa] transition-colors">
+                      {enlace.etiqueta}
+                    </Link>
                   </li>
                 ))}
               </ul>

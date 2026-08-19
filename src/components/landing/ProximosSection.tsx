@@ -33,7 +33,7 @@ export default function ProximosSection() {
             Próximos
           </h2>
         </div>
-        <Link to="/panel/catalogo-anime" className="flex items-center gap-1 text-[#946ed9] text-sm hover:text-[#b08ee8] transition-colors">
+        <Link to="/explorar?type=upcoming" className="flex items-center gap-1 text-[#946ed9] text-sm hover:text-[#b08ee8] transition-colors">
           Ver todo <ChevronRight className="w-3.5 h-3.5" />
         </Link>
       </div>

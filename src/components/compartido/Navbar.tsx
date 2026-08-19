@@ -6,7 +6,11 @@ import { useAuth } from "../../store/auth";
 
 // ─── Navegación principal ─────────────────────────────────────────────────────
 
-const ENLACES_NAV = ["Temporada", "Próximos", "Top Anime y Manga"] as const;
+const ENLACES_NAV = [
+  { etiqueta: "Temporada", ruta: "/explorar?type=season" },
+  { etiqueta: "Próximos", ruta: "/explorar?type=upcoming" },
+  { etiqueta: "Top Anime y Manga", ruta: "/explorar?type=popular" },
+] as const;
 
 function Avatar({ avatar }: { avatar: string }) {
   return (
@@ -34,13 +38,13 @@ export default function Navbar() {
         {/* Enlace de navegación — solo visibles en desktop */}
         <div className="hidden md:flex items-center gap-0.5 ml-2">
           {ENLACES_NAV.map(enlace => (
-            <a
-              key={enlace}
-              href="/"
+            <Link
+              key={enlace.etiqueta}
+              to={enlace.ruta}
               className="text-[#8b82a8] hover:text-[#f0eefa] text-sm px-3 py-1.5 rounded-lg transition-colors duration-150"
             >
-              {enlace}
-            </a>
+              {enlace.etiqueta}
+            </Link>
           ))}
         </div>
 
@@ -113,13 +117,14 @@ export default function Navbar() {
         <div className="sm:hidden bg-[#110f1a] border-t border-[#2a2140] px-4 py-3 space-y-1">
           {/* Enlace de secciones */}
           {ENLACES_NAV.map(enlace => (
-            <a
-              key={enlace}
-              href="/"
+            <Link
+              key={enlace.etiqueta}
+              to={enlace.ruta}
+              onClick={() => setMenuMovilAbierto(false)}
               className="block text-[#8b82a8] hover:text-[#f0eefa] text-sm px-3 py-2 rounded-lg transition-colors"
             >
-              {enlace}
-            </a>
+              {enlace.etiqueta}
+            </Link>
           ))}
 
           {/* Buscador móvil */}

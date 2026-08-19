@@ -205,6 +205,41 @@ export async function buscarCatalogo(f: CatalogoFiltros): Promise<CatalogoRespue
   }
 }
 
+export type Temporada = "winter" | "spring" | "summer" | "fall";
+
+/**
+ * Consulta el catálogo de una temporada y año concretos (p. ej. 2026/winter).
+ * Usa el endpoint /seasons/{year}/{season} de Jikan/Tenrai.
+ */
+export async function buscarPorTemporada(
+  anio: number,
+  temporada: Temporada,
+  pagina = 1,
+  sfw = true,
+): Promise<CatalogoRespuesta> {
+  const p = new URLSearchParams();
+  p.set("page", String(pagina));
+  p.set("limit", "20");
+  p.set("sfw", sfw ? "true" : "false");
+
+  try {
+    const json = await pedirJikan<{
+      data: JikanEntrada[];
+      pagination?: { current_page?: number; last_visible_page?: number; items?: { total?: number } };
+    }>(`/seasons/${anio}/${temporada}?${p.toString()}`);
+
+    return {
+      items: (json.data || []).map(e => normalizar(e, "anime")),
+      paginaActual: json.pagination?.current_page ?? 1,
+      ultimaPagina: Math.min(json.pagination?.last_visible_page ?? 1, 100),
+      total: json.pagination?.items?.total ?? (json.data || []).length,
+    };
+  } catch {
+    // Fallback local basado en el año (no hay datos por temporada en el respaldo).
+    return catalogoLocal({ medio: "anime", anio: String(anio), pagina, sfw });
+  }
+}
+
 // ─── Noticias de la industria (API Tenrai / Jikan) ───────────────────────────
 
 export interface Noticia {
