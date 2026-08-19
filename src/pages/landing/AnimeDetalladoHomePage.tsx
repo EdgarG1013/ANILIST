@@ -9,6 +9,7 @@ import AnimeCharacters from "../../components/anime/AnimeCharacters";
 import AnimeEpisodes from "../../components/anime/AnimeEpisodes";
 import AnimeInfoSidebar from "../../components/anime/AnimeInfoSidebar";
 import AnimeHorizontalCarousel from "../../components/anime/AnimeHorizontalCarousel";
+import DetalleSkeleton from "../../components/compartido/DetalleSkeleton";
 
 export default function AnimeDetailsPage() {
   const { id } = useParams();
@@ -33,13 +34,7 @@ export default function AnimeDetailsPage() {
   };
 
   if (cargando) {
-    return (
-      <main className="min-h-screen bg-background">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-20 text-center">
-          <p className="text-muted-foreground animate-pulse">Cargando detalles…</p>
-        </div>
-      </main>
-    );
+    return <DetalleSkeleton />;
   }
 
   // Anime no encontrado (id inválido o sin datos)

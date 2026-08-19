@@ -5,6 +5,7 @@ import { obtenerMangaDetalleApi, type MangaDetalle } from "../../api/mangaDetail
 import MangaHeroBanner from "../../components/anime/MangaHeroBanner";
 import AnimeSynopsis from "../../components/anime/AnimeSynopsis";
 import AnimeHorizontalCarousel from "../../components/anime/AnimeHorizontalCarousel";
+import DetalleSkeleton from "../../components/compartido/DetalleSkeleton";
 
 function InfoFila({ label, value }: { label: string; value: string }) {
   return (
@@ -38,13 +39,7 @@ export default function MangaDetalladoPage() {
   };
 
   if (cargando) {
-    return (
-      <main className="min-h-screen bg-background">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 py-20 text-center">
-          <p className="text-muted-foreground animate-pulse">Cargando detalles…</p>
-        </div>
-      </main>
-    );
+    return <DetalleSkeleton />;
   }
 
   if (!manga) {
