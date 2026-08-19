@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Check, Plus, Loader2, AlertCircle } from "lucide-react";
 import {
-  buscarCatalogo, TIPOS, ESTADOS, GENEROS, ANIOS, LETRAS, ORDENES,
+  buscarCatalogo, TIPOS, ESTADOS, GENEROS, ANIOS, LETRAS, ORDENES, TEMPORADAS,
   type CatalogoItem, type Medio,
 } from "../../api/jikanClient";
 import { useBiblioteca } from "../../store/biblioteca";
@@ -93,6 +93,7 @@ export default function Catalogo({ medio, titulo }: { medio: Medio; titulo: stri
   const [tipo, setTipo] = useState("");
   const [genero, setGenero] = useState("");
   const [anio, setAnio] = useState("");
+  const [temporada, setTemporada] = useState("");
   const [estado, setEstado] = useState("");
   const [orden, setOrden] = useState("");
   const [pagina, setPagina] = useState(1);
@@ -113,7 +114,7 @@ export default function Catalogo({ medio, titulo }: { medio: Medio; titulo: stri
     let vivo = true;
     setCargando(true);
     setError(null);
-    buscarCatalogo({ medio, q, letra, tipo, genero, anio, estado, orden, pagina, sfw: preferencias.sfw })
+    buscarCatalogo({ medio, q, letra, tipo, genero, anio, temporada, estado, orden, pagina, sfw: preferencias.sfw })
       .then(r => {
         if (!vivo) return;
         setItems(r.items);
@@ -123,7 +124,7 @@ export default function Catalogo({ medio, titulo }: { medio: Medio; titulo: stri
       .catch(() => vivo && setError("No pudimos cargar el catálogo. Intenta de nuevo."))
       .finally(() => vivo && setCargando(false));
     return () => { vivo = false; };
-  }, [medio, q, letra, tipo, genero, anio, estado, orden, pagina, preferencias.sfw]);
+  }, [medio, q, letra, tipo, genero, anio, temporada, estado, orden, pagina, preferencias.sfw]);
 
   const cambiar = (fn: (v: string) => void) => (v: string) => { fn(v); setPagina(1); };
 
@@ -179,6 +180,10 @@ export default function Catalogo({ medio, titulo }: { medio: Medio; titulo: stri
           opciones={GENEROS.map(g => ({ valor: String(g.id), etiqueta: g.nombre }))} />
         <Select etiqueta="Año" valor={anio} onChange={cambiar(setAnio)}
           opciones={ANIOS.map(a => ({ valor: String(a), etiqueta: String(a) }))} />
+        {medio === "anime" && (
+          <Select etiqueta="Temporada" valor={temporada} onChange={cambiar(setTemporada)}
+            opciones={TEMPORADAS.map(t => ({ valor: t.valor, etiqueta: t.etiqueta }))} />
+        )}
         <Select etiqueta="Estado" valor={estado} onChange={cambiar(setEstado)} opciones={ESTADOS[medio]} />
       </div>
 

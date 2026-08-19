@@ -39,6 +39,7 @@ export interface CatalogoFiltros {
   tipo?: string;
   genero?: string;
   anio?: string;
+  temporada?: string;
   estado?: string;
   orden?: string;
   pagina?: number;
@@ -83,6 +84,14 @@ export const GENEROS: { id: number; nombre: string }[] = [
 ];
 
 export const ANIOS: number[] = Array.from({ length: 37 }, (_, i) => 2026 - i);
+
+/** Temporadas del año (valores que acepta Jikan en /seasons) */
+export const TEMPORADAS: { valor: string; etiqueta: string; meses: [number, number] }[] = [
+  { valor: "winter", etiqueta: "Invierno", meses: [1, 3] },
+  { valor: "spring", etiqueta: "Primavera", meses: [4, 6] },
+  { valor: "summer", etiqueta: "Verano", meses: [7, 9] },
+  { valor: "fall", etiqueta: "Otoño", meses: [10, 12] },
+];
 
 export const LETRAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -177,9 +186,18 @@ export async function buscarCatalogo(f: CatalogoFiltros): Promise<CatalogoRespue
   if (f.tipo) p.set("type", f.tipo.toLowerCase());
   if (f.genero) p.set("genres", f.genero);
   if (f.estado) p.set("status", f.estado);
-  if (f.anio) {
-    p.set("start_date", `${f.anio}-01-01`);
-    p.set("end_date", `${f.anio}-12-31`);
+  if (f.anio || f.temporada) {
+    const anio = f.anio ? Number(f.anio) : new Date().getFullYear();
+    const temp = TEMPORADAS.find(t => t.valor === f.temporada);
+    if (temp) {
+      const [m1, m2] = temp.meses;
+      const diaFin = new Date(anio, m2, 0).getDate(); // último día del mes
+      p.set("start_date", `${anio}-${String(m1).padStart(2, "0")}-01`);
+      p.set("end_date", `${anio}-${String(m2).padStart(2, "0")}-${String(diaFin).padStart(2, "0")}`);
+    } else {
+      p.set("start_date", `${anio}-01-01`);
+      p.set("end_date", `${anio}-12-31`);
+    }
   }
   if (f.orden) {
     const [by, dir] = f.orden.split(":");
