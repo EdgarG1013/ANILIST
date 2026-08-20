@@ -57,13 +57,13 @@ export default function MostPopularSection() {
       <MostPopularCarousel
         title="Top Anime"
         viewAllLabel="Ver todo"
-        basePath="/anime"
+        basePath="/explorar?type=popular"
         items={itemsAnime}
       />
       <MostPopularCarousel
         title="Top Manga"
         viewAllLabel="Ver todo"
-        basePath="/manga"
+        basePath="/explorar?type=popular&medio=manga"
         items={itemsManga}
         reverse
       />

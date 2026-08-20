@@ -17,12 +17,12 @@ export default function HomePage() {
         {/* En Temporada */}
         <SeasonSection />
 
-        {/* Próximos estrenos */}
-        <ProximosSection />
-
         {/* Más Populares — anime y manga */}
         <MostPopularSection />
 
+        {/* Próximos estrenos */}
+        <ProximosSection />
+        
       </main>
     </div>
   );
