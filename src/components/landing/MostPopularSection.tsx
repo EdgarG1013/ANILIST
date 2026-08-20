@@ -65,6 +65,7 @@ export default function MostPopularSection() {
         viewAllLabel="Ver todo"
         basePath="/manga"
         items={itemsManga}
+        reverse
       />
     </section>
   );

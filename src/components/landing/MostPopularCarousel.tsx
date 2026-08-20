@@ -11,6 +11,8 @@ interface MostPopularCarouselProps {
   viewAllLabel?: string;
   /** Ruta base para los enlaces de detalle */
   basePath: string;
+  /** Si es true, invierte el orden de las columnas en desktop: poster → sinopsis → título */
+  reverse?: boolean;
 }
 
 function truncateSynopsis(text: string | null, maxWords: number = 100): string {
@@ -20,7 +22,7 @@ function truncateSynopsis(text: string | null, maxWords: number = 100): string {
   return words.slice(0, maxWords).join(" ") + "...";
 }
 
-function MostPopularCarousel({ items, title, viewAllLabel = "Ver todo", basePath }: MostPopularCarouselProps) {
+function MostPopularCarousel({ items, title, viewAllLabel = "Ver todo", basePath, reverse = false }: MostPopularCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [displayIndex, setDisplayIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -120,10 +122,16 @@ function MostPopularCarousel({ items, title, viewAllLabel = "Ver todo", basePath
       {/* ── Desktop: grid de 3 columnas (visible ≥1024px) ── */}
       <div
         className="hidden lg:grid"
-        style={{ gridTemplateColumns: "360px 1fr 300px", gap: "32px" }}
+        style={{
+          gridTemplateColumns: reverse ? "300px 1fr 360px" : "360px 1fr 300px",
+          gap: "32px",
+        }}
       >
-        {/* Columna 1: Título + Meta / Flechas de navegación */}
-        <div className="flex flex-col justify-between" style={{ minHeight: "460px" }}>
+        {/* Columna Título + Meta / Flechas de navegación */}
+        <div
+          className="flex flex-col justify-between"
+          style={{ minHeight: "460px", order: reverse ? 3 : 1 }}
+        >
           <div style={contentStyle}>
             <Link to={`${basePath}/${item.id}`}>
               <h3
@@ -161,8 +169,11 @@ function MostPopularCarousel({ items, title, viewAllLabel = "Ver todo", basePath
           <div className="flex gap-2.5">{navButtons}</div>
         </div>
 
-        {/* Columna 2: Sinopsis + Géneros / Ranking */}
-        <div className="flex flex-col justify-between" style={{ minHeight: "460px" }}>
+        {/* Columna Sinopsis + Géneros / Ranking */}
+        <div
+          className="flex flex-col justify-between"
+          style={{ minHeight: "460px", order: 2 }}
+        >
           <div style={contentStyle}>
             <p
               className="text-[#8b82a8] mb-6"
@@ -207,8 +218,8 @@ function MostPopularCarousel({ items, title, viewAllLabel = "Ver todo", basePath
           </div>
         </div>
 
-        {/* Columna 3: Poster */}
-        <div style={{ height: "100%", ...contentStyle }}>
+        {/* Columna Poster */}
+        <div style={{ height: "100%", order: reverse ? 1 : 3, ...contentStyle }}>
           <Link
             to={`${basePath}/${item.id}`}
             className="block h-full overflow-hidden rounded-2xl"
