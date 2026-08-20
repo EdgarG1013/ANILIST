@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight, TrendingUp } from "lucide-react";
 import type { PopularItem } from "../../api/jikan";
 
 interface MostPopularCarouselProps {
@@ -13,7 +13,7 @@ interface MostPopularCarouselProps {
   basePath: string;
 }
 
-function truncateSynopsis(text: string | null, maxWords: number = 60): string {
+function truncateSynopsis(text: string | null, maxWords: number = 100): string {
   if (!text) return "";
   const words = text.split(/\s+/);
   if (words.length <= maxWords) return text;
@@ -98,58 +98,56 @@ function MostPopularCarousel({ items, title, viewAllLabel = "Ver todo", basePath
   );
 
   return (
-    <section className="bg-[#110f1a] border border-[#2a2140] rounded-2xl overflow-hidden">
+    <section className="mb-12">
       {/* Encabezado de la sección */}
-      <div className="flex items-center justify-between border-b border-[#2a2140] px-5 py-4">
-        <div className="flex items-center gap-2.5">
-          <h2 className="font-bold text-[15px]">{title}</h2>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-[#946ed9]/15">
+            <TrendingUp size={14} className="text-[#946ed9]" />
+          </div>
+          <h2 className="text-[#f0eefa] text-[1.5rem] font-semibold" style={{ fontFamily: "'Oxanium', sans-serif" }}>
+            {title}
+          </h2>
         </div>
         <Link
           to={basePath}
-          className="flex items-center gap-1 text-sm text-[#946ed9] hover:text-[#b08ee8] transition-colors hover:gap-2"
+          className="flex items-center gap-1 text-sm text-[#946ed9] transition-all hover:gap-2 hover:text-[#b08ee8]"
         >
           {viewAllLabel} <ArrowRight size={14} />
         </Link>
       </div>
 
-      {/* Contenido del carrusel */}
-      <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-0">
-        {/* Columna 1: Poster */}
-        <Link
-          to={`${basePath}/${item.id}`}
-          className="block relative sm:h-full aspect-[2/3] sm:aspect-auto overflow-hidden"
-        >
-          <img
-            src={item.img}
-            alt={item.title}
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-            loading="eager"
-          />
-          <span
-            className="absolute bottom-2 right-2 font-extrabold leading-none"
-            style={{ fontFamily: "'Oxanium', sans-serif", fontSize: "3rem", color: "rgba(240,238,250,0.85)" }}
-          >
-            #{displayIndex + 1}
-          </span>
-        </Link>
-
-        {/* Columna 2: Información */}
-        <div className="flex flex-col justify-between p-5 min-h-[200px]">
+      {/* ── Desktop: grid de 3 columnas (visible ≥1024px) ── */}
+      <div
+        className="hidden lg:grid"
+        style={{ gridTemplateColumns: "360px 1fr 300px", gap: "32px" }}
+      >
+        {/* Columna 1: Título + Meta / Flechas de navegación */}
+        <div className="flex flex-col justify-between" style={{ minHeight: "460px" }}>
           <div style={contentStyle}>
-            {/* Título */}
             <Link to={`${basePath}/${item.id}`}>
               <h3
-                className="text-[#f0eefa] uppercase tracking-tight leading-none mb-3 cursor-pointer transition-colors hover:text-[#946ed9]"
-                style={{ fontFamily: "'Oxanium', sans-serif", fontSize: "1.75rem", lineHeight: 0.95 }}
+                className="text-[#f0eefa] uppercase cursor-pointer transition-colors hover:text-[#946ed9]"
+                style={{
+                  fontFamily: "'Oxanium', sans-serif",
+                  fontSize: "clamp(3rem, 3vw, 2.6rem)",
+                  lineHeight: "0.8",
+                  letterSpacing: "-0.01em",
+                  margin: "0 0 14px 0",
+                }}
               >
                 {item.title}
               </h3>
             </Link>
 
-            {/* Año · Cantidad */}
-            <div className="flex items-center gap-2 text-[#8b82a8] text-sm mb-3">
+            <div
+              className="text-[#8b82a8] flex items-center gap-2.5"
+              style={{ fontSize: "0.875rem" }}
+            >
               {item.year && <span>{item.year}</span>}
-              {item.year && item.count && <span className="w-px h-3.5 bg-[#8b82a8] opacity-40" />}
+              {item.year && item.count && (
+                <span className="w-px h-3.5 bg-[#8b82a8] opacity-40 inline-block" />
+              )}
               {item.count && (
                 <span>
                   {item.count} {item.countLabel}
@@ -157,19 +155,35 @@ function MostPopularCarousel({ items, title, viewAllLabel = "Ver todo", basePath
                 </span>
               )}
             </div>
+          </div>
 
-            {/* Sinopsis */}
-            <p className="text-[#8b82a8] text-sm leading-relaxed mb-4">
+          {/* Flechas — fuera de contentStyle para que no parpadeen */}
+          <div className="flex gap-2.5">{navButtons}</div>
+        </div>
+
+        {/* Columna 2: Sinopsis + Géneros / Ranking */}
+        <div className="flex flex-col justify-between" style={{ minHeight: "460px" }}>
+          <div style={contentStyle}>
+            <p
+              className="text-[#8b82a8] mb-6"
+              style={{ fontSize: "0.85rem", lineHeight: "1.8" }}
+            >
               {truncateSynopsis(item.synopsis)}
             </p>
 
-            {/* Géneros */}
             {item.genres.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {item.genres.slice(0, 5).map(genre => (
+                {item.genres.slice(0, 6).map(genre => (
                   <span
                     key={genre}
-                    className="px-3 py-1 rounded-full border border-[#2a2140] text-[#c4bbd8] text-xs"
+                    className="text-[#f0eefa] whitespace-nowrap"
+                    style={{
+                      padding: "5px 16px",
+                      borderRadius: "20px",
+                      border: "1px solid #2a2140",
+                      fontSize: "0.8rem",
+                      fontWeight: 500,
+                    }}
                   >
                     {genre}
                   </span>
@@ -178,15 +192,107 @@ function MostPopularCarousel({ items, title, viewAllLabel = "Ver todo", basePath
             )}
           </div>
 
-          {/* Navegación inferior */}
-          <div className="flex items-center justify-between mt-5">
-            <span
-              className="font-extrabold text-[#946ed9]"
-              style={{ fontFamily: "'Oxanium', sans-serif", fontSize: "1.5rem", lineHeight: 1 }}
+          {/* Ranking */}
+          <div
+            className="text-[#946ed9] self-end"
+            style={{
+              fontFamily: "'Oxanium', sans-serif",
+              fontSize: "3rem",
+              lineHeight: 1,
+              letterSpacing: "0.02em",
+              ...contentStyle,
+            }}
+          >
+            #{displayIndex + 1}
+          </div>
+        </div>
+
+        {/* Columna 3: Poster */}
+        <div style={{ height: "100%", ...contentStyle }}>
+          <Link
+            to={`${basePath}/${item.id}`}
+            className="block h-full overflow-hidden rounded-2xl"
+            style={{ boxShadow: "0 8px 32px rgba(0, 0, 0, 0.35)" }}
+          >
+            <img
+              src={item.img}
+              alt={item.title}
+              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+              loading="eager"
+            />
+          </Link>
+        </div>
+      </div>
+
+      {/* ── Mobile / Tablet (visible <1024px) ── */}
+      <div className="lg:hidden bg-[#110f1a] border border-[#2a2140] rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-0">
+          {/* Poster */}
+          <div style={contentStyle}>
+            <Link
+              to={`${basePath}/${item.id}`}
+              className="block relative sm:h-full aspect-[2/3] sm:aspect-auto overflow-hidden"
             >
-              #{displayIndex + 1}
-            </span>
-            <div className="flex gap-2">{navButtons}</div>
+              <img
+                src={item.img}
+                alt={item.title}
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
+            </Link>
+          </div>
+
+          {/* Info */}
+          <div className="flex flex-col justify-between p-5 min-h-[200px]">
+            <div style={contentStyle}>
+              <Link to={`${basePath}/${item.id}`}>
+                <h3
+                  className="text-[#f0eefa] uppercase tracking-tight leading-none mb-3 cursor-pointer transition-colors hover:text-[#946ed9]"
+                  style={{ fontFamily: "'Oxanium', sans-serif", fontSize: "1.75rem", lineHeight: 0.95 }}
+                >
+                  {item.title}
+                </h3>
+              </Link>
+
+              <div className="flex items-center gap-2 text-[#8b82a8] text-sm mb-3">
+                {item.year && <span>{item.year}</span>}
+                {item.year && item.count && <span className="w-px h-3.5 bg-[#8b82a8] opacity-40" />}
+                {item.count && (
+                  <span>
+                    {item.count} {item.countLabel}
+                    {item.count !== 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
+
+              <p className="text-[#8b82a8] text-sm leading-relaxed mb-4">
+                {truncateSynopsis(item.synopsis, 50)}
+              </p>
+
+              {item.genres.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {item.genres.slice(0, 5).map(genre => (
+                    <span
+                      key={genre}
+                      className="px-3 py-1 rounded-full border border-[#2a2140] text-[#c4bbd8] text-xs"
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Ranking + navegación */}
+            <div className="flex items-center justify-between mt-5">
+              <span
+                className="font-extrabold text-[#946ed9]"
+                style={{ fontFamily: "'Oxanium', sans-serif", fontSize: "1.5rem", lineHeight: 1, ...contentStyle }}
+              >
+                #{displayIndex + 1}
+              </span>
+              <div className="flex gap-2">{navButtons}</div>
+            </div>
           </div>
         </div>
       </div>
