@@ -48,6 +48,12 @@ export interface Perfil {
   correo: string;
 }
 
+/** Preferencias de contenido del panel */
+export interface Preferencias {
+  /** Si es false, no se filtra por contenido seguro (muestra títulos para adultos) */
+  sfw: boolean;
+}
+
 interface BibliotecaCtx {
   entradas: Entrada[];
   grupos: Grupo[];
@@ -63,6 +69,8 @@ interface BibliotecaCtx {
   eliminarGrupo: (id: string) => void;
   setPerfil: (p: Partial<Perfil>) => void;
   reemplazarTodo: (datos: { entradas?: Entrada[]; grupos?: Grupo[] }) => void;
+  preferencias: Preferencias;
+  setPreferencias: (p: Partial<Preferencias>) => void;
 }
 
 const LLAVE = "anilist:biblioteca:v1";
@@ -75,25 +83,29 @@ const PERFIL_INICIAL: Perfil = {
   correo: "edgar@anilist.app",
 };
 
+const PREFERENCIAS_INICIALES: Preferencias = { sfw: true };
+
 interface Guardado {
   entradas: Entrada[];
   grupos: Grupo[];
   perfil: Perfil;
+  preferencias: Preferencias;
 }
 
 function leer(): Guardado {
-  if (typeof window === "undefined") return { entradas: [], grupos: [], perfil: PERFIL_INICIAL };
+  if (typeof window === "undefined") return { entradas: [], grupos: [], perfil: PERFIL_INICIAL, preferencias: PREFERENCIAS_INICIALES };
   try {
     const raw = localStorage.getItem(LLAVE);
-    if (!raw) return { entradas: [], grupos: [], perfil: PERFIL_INICIAL };
+    if (!raw) return { entradas: [], grupos: [], perfil: PERFIL_INICIAL, preferencias: PREFERENCIAS_INICIALES };
     const p = JSON.parse(raw) as Partial<Guardado>;
     return {
       entradas: p.entradas ?? [],
       grupos: p.grupos ?? [],
       perfil: { ...PERFIL_INICIAL, ...(p.perfil ?? {}) },
+      preferencias: { ...PREFERENCIAS_INICIALES, ...(p.preferencias ?? {}) },
     };
   } catch {
-    return { entradas: [], grupos: [], perfil: PERFIL_INICIAL };
+    return { entradas: [], grupos: [], perfil: PERFIL_INICIAL, preferencias: PREFERENCIAS_INICIALES };
   }
 }
 
@@ -102,10 +114,11 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
   const [entradas, setEntradas] = useState<Entrada[]>(inicial.entradas);
   const [grupos, setGrupos] = useState<Grupo[]>(inicial.grupos);
   const [perfil, setPerfilEstado] = useState<Perfil>(inicial.perfil);
+  const [preferencias, setPreferenciasEstado] = useState<Preferencias>(inicial.preferencias);
 
   useEffect(() => {
-    localStorage.setItem(LLAVE, JSON.stringify({ entradas, grupos, perfil }));
-  }, [entradas, grupos, perfil]);
+    localStorage.setItem(LLAVE, JSON.stringify({ entradas, grupos, perfil, preferencias }));
+  }, [entradas, grupos, perfil, preferencias]);
 
   const clave = (medio: Medio, id: number) => `${medio}:${id}`;
 
@@ -156,6 +169,8 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
       setGrupos(prev => prev.map(g => (g.id === id ? { ...g, ...cambios } : g))),
     eliminarGrupo: id => setGrupos(prev => prev.filter(g => g.id !== id)),
     setPerfil: p => setPerfilEstado(prev => ({ ...prev, ...p })),
+    preferencias,
+    setPreferencias: p => setPreferenciasEstado(prev => ({ ...prev, ...p })),
     reemplazarTodo: datos => {
       if (datos.entradas) setEntradas(datos.entradas);
       if (datos.grupos) setGrupos(datos.grupos);

@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Heart, Trash2, GripVertical, Minus, Plus } from "lucide-react";
 import type { Medio } from "../../api/jikanClient";
 import {
   useBiblioteca, ESTADOS_ANIME, ESTADOS_MANGA, type Entrada, type Estado,
 } from "../../store/biblioteca";
+import DeleteConfirmModal from "../compartido/DeleteConfirmModal";
 
 // ─── Listas clásicas con ordenamiento personalizable ─────────────────────────
 
@@ -24,6 +26,7 @@ export default function Listas({ medio, titulo }: { medio: Medio; titulo: string
   const [seccion, setSeccion] = useState<"todos" | Estado>("todos");
   const [orden, setOrden] = useState<Orden>("fecha-desc");
   const [arrastrado, setArrastrado] = useState<string | null>(null);
+  const [aEliminar, setAEliminar] = useState<Entrada | null>(null);
 
   const visibles = useMemo(() => {
     const base = entradas.filter(e => e.medio === medio && (seccion === "todos" || e.estado === seccion));
@@ -152,9 +155,13 @@ export default function Listas({ medio, titulo }: { medio: Medio; titulo: string
                 />
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold truncate" style={{ fontFamily: "'Oxanium', sans-serif" }}>
+                  <Link
+                    to={e.medio === "anime" ? `/panel/anime/${e.id}` : `/panel/manga/${e.id}`}
+                    className="text-sm font-semibold truncate block hover:text-[#b08ee8] transition-colors"
+                    style={{ fontFamily: "'Oxanium', sans-serif" }}
+                  >
                     {e.titulo}
-                  </p>
+                  </Link>
                   <p className="text-xs text-[#8b82a8]">
                     {e.tipo} · guardado el {new Date(e.agregado).toLocaleDateString("es")}
                   </p>
@@ -201,7 +208,7 @@ export default function Listas({ medio, titulo }: { medio: Medio; titulo: string
                 </button>
 
                 <button
-                  onClick={() => quitar(e.medio, e.id)}
+                  onClick={() => setAEliminar(e)}
                   aria-label={`Eliminar ${e.titulo} de la lista`}
                   className="w-9 h-9 rounded-lg border border-[#2a2140] flex items-center justify-center text-[#8b82a8] hover:text-[#ff9aa8]"
                 >
@@ -212,6 +219,19 @@ export default function Listas({ medio, titulo }: { medio: Medio; titulo: string
           })}
         </ul>
       )}
+
+      <DeleteConfirmModal
+        isOpen={aEliminar !== null}
+        onClose={() => setAEliminar(null)}
+        onConfirm={() => {
+          if (aEliminar) {
+            quitar(aEliminar.medio, aEliminar.id);
+            setAEliminar(null);
+          }
+        }}
+        title={aEliminar?.titulo ?? ""}
+        itemLabel={medio === "anime" ? "anime" : "manga"}
+      />
     </div>
   );
 }

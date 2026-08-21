@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { FolderPlus, Trash2, Plus, GripVertical, X } from "lucide-react";
 import { useBiblioteca, type Grupo, type ListaPersonalizada } from "../../store/biblioteca";
+import DeleteConfirmModal from "../../components/compartido/DeleteConfirmModal";
 
 // ─── Grupos: colecciones de listas personalizadas (anime + manga mezclados) ──
 
@@ -15,9 +16,9 @@ const ORDENES: { valor: Orden; etiqueta: string }[] = [
 ];
 
 function ListaDeGrupo({
-  grupo, lista, onCambio,
-}: { grupo: Grupo; lista: ListaPersonalizada; onCambio: (l: ListaPersonalizada) => void }) {
-  const { entradas, actualizarGrupo, clave } = useBiblioteca();
+  lista, onCambio, onEliminar,
+}: { lista: ListaPersonalizada; onCambio: (l: ListaPersonalizada) => void; onEliminar: () => void }) {
+  const { entradas, clave } = useBiblioteca();
   const [orden, setOrden] = useState<Orden>("manual");
   const [seleccion, setSeleccion] = useState("");
 
@@ -66,7 +67,7 @@ function ListaDeGrupo({
           {ORDENES.map(o => <option key={o.valor} value={o.valor}>{o.etiqueta}</option>)}
         </select>
         <button
-          onClick={() => actualizarGrupo(grupo.id, { listas: grupo.listas.filter(l => l.id !== lista.id) })}
+          onClick={onEliminar}
           aria-label={`Eliminar lista ${lista.nombre}`}
           className="w-9 h-9 rounded-lg border border-[#2a2140] text-[#8b82a8] hover:text-[#ff9aa8] flex items-center justify-center"
         >
@@ -155,6 +156,8 @@ export default function GruposPage() {
   const [descripcion, setDescripcion] = useState("");
   const [etiquetas, setEtiquetas] = useState("");
   const [filtro, setFiltro] = useState("");
+  const [aEliminarGrupo, setAEliminarGrupo] = useState<Grupo | null>(null);
+  const [aEliminarLista, setAEliminarLista] = useState<{ grupo: Grupo; lista: ListaPersonalizada } | null>(null);
 
   const visibles = grupos.filter(g => {
     const t = filtro.trim().toLowerCase();
@@ -246,7 +249,7 @@ export default function GruposPage() {
                     <Plus className="w-3.5 h-3.5" /> Nueva lista
                   </button>
                   <button
-                    onClick={() => eliminarGrupo(g.id)}
+                    onClick={() => setAEliminarGrupo(g)}
                     aria-label={`Eliminar grupo ${g.titulo}`}
                     className="w-9 h-9 rounded-xl border border-[#2a2140] text-[#8b82a8] hover:text-[#ff9aa8] flex items-center justify-center"
                   >
@@ -260,10 +263,10 @@ export default function GruposPage() {
               ) : (
                 <div className="grid gap-3 lg:grid-cols-2">
                   {g.listas.map(l => (
-                    <ListaDeGrupo
+                                        <ListaDeGrupo
                       key={l.id}
-                      grupo={g}
                       lista={l}
+                      onEliminar={() => setAEliminarLista({ grupo: g, lista: l })}
                       onCambio={nueva => actualizarGrupo(g.id, {
                         listas: g.listas.map(x => (x.id === nueva.id ? nueva : x)),
                       })}
@@ -275,6 +278,35 @@ export default function GruposPage() {
           ))}
         </div>
       )}
+
+      <DeleteConfirmModal
+        isOpen={aEliminarGrupo !== null}
+        onClose={() => setAEliminarGrupo(null)}
+        onConfirm={() => {
+          if (aEliminarGrupo) {
+            eliminarGrupo(aEliminarGrupo.id);
+            setAEliminarGrupo(null);
+          }
+        }}
+        title={aEliminarGrupo?.titulo ?? ""}
+        itemLabel="grupo"
+      />
+
+      <DeleteConfirmModal
+        isOpen={aEliminarLista !== null}
+        onClose={() => setAEliminarLista(null)}
+        onConfirm={() => {
+          if (aEliminarLista) {
+            const { grupo, lista } = aEliminarLista;
+            actualizarGrupo(grupo.id, {
+              listas: grupo.listas.filter(l => l.id !== lista.id),
+            });
+            setAEliminarLista(null);
+          }
+        }}
+        title={aEliminarLista?.lista.nombre ?? ""}
+        itemLabel="lista"
+      />
     </div>
   );
 }

@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Menu, X, LayoutDashboard, User } from "lucide-react";
+import { Menu, X, LayoutDashboard, User } from "lucide-react";
 import logo from "../../assets/logo.svg";
 import { useAuth } from "../../store/auth";
+import SearchBar from "./SearchBar";
 
 // ─── Navegación principal ─────────────────────────────────────────────────────
 
-const ENLACES_NAV = ["Temporada", "Próximos", "Top Anime y Manga"] as const;
+const ENLACES_NAV = [
+  { etiqueta: "Temporada", ruta: "/explorar?type=season" },
+  { etiqueta: "Próximos", ruta: "/explorar?type=upcoming" },
+  { etiqueta: "Más Populares", ruta: "/explorar?type=popular" },
+] as const;
 
 function Avatar({ avatar }: { avatar: string }) {
   return (
@@ -34,13 +39,13 @@ export default function Navbar() {
         {/* Enlace de navegación — solo visibles en desktop */}
         <div className="hidden md:flex items-center gap-0.5 ml-2">
           {ENLACES_NAV.map(enlace => (
-            <a
-              key={enlace}
-              href="/"
+            <Link
+              key={enlace.etiqueta}
+              to={enlace.ruta}
               className="text-[#8b82a8] hover:text-[#f0eefa] text-sm px-3 py-1.5 rounded-lg transition-colors duration-150"
             >
-              {enlace}
-            </a>
+              {enlace.etiqueta}
+            </Link>
           ))}
         </div>
 
@@ -49,14 +54,7 @@ export default function Navbar() {
 
         {/* Buscador — visible desde tablet */}
         <div className="hidden sm:block w-60 lg:w-72">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8b82a8]" />
-            <input
-              type="search"
-              placeholder="Buscar anime, manga…"
-              className="w-full h-9 bg-[#16141e] border border-[#2a2140] text-sm pl-9 pr-4 rounded-xl text-[#f0eefa] placeholder:text-[#8b82a8] focus:outline-none focus:border-[#946ed9] transition-colors"
-            />
-          </div>
+          <SearchBar />
         </div>
 
         {/* Botones de autenticación / Dashboard — desktop */}
@@ -93,12 +91,6 @@ export default function Navbar() {
         {/* Controles móviles: buscador + hamburguesa */}
         <div className="flex sm:hidden items-center gap-2">
           <button
-            aria-label="Buscar"
-            className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#2a2140] text-[#8b82a8]"
-          >
-            <Search className="w-4 h-4" />
-          </button>
-          <button
             onClick={() => setMenuMovilAbierto(o => !o)}
             aria-label="Menú"
             className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#2a2140] text-[#8b82a8]"
@@ -113,23 +105,19 @@ export default function Navbar() {
         <div className="sm:hidden bg-[#110f1a] border-t border-[#2a2140] px-4 py-3 space-y-1">
           {/* Enlace de secciones */}
           {ENLACES_NAV.map(enlace => (
-            <a
-              key={enlace}
-              href="/"
+            <Link
+              key={enlace.etiqueta}
+              to={enlace.ruta}
+              onClick={() => setMenuMovilAbierto(false)}
               className="block text-[#8b82a8] hover:text-[#f0eefa] text-sm px-3 py-2 rounded-lg transition-colors"
             >
-              {enlace}
-            </a>
+              {enlace.etiqueta}
+            </Link>
           ))}
 
           {/* Buscador móvil */}
-          <div className="relative pt-1">
-            <Search className="absolute left-3 top-1/2 mt-0.5 -translate-y-1/2 w-4 h-4 text-[#8b82a8]" />
-            <input
-              type="search"
-              placeholder="Buscar anime, manga…"
-              className="w-full h-9 bg-[#16141e] border border-[#2a2140] text-sm pl-9 pr-4 rounded-xl text-[#f0eefa] placeholder:text-[#8b82a8] focus:outline-none"
-            />
+          <div className="pt-1">
+            <SearchBar onNavegacion={() => setMenuMovilAbierto(false)} />
           </div>
 
           {/* Botones de auth / Dashboard en móvil */}

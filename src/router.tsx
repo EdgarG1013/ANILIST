@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
 // ─── Paginas del home ───────────────────────────────────────────────
 import HomePage from "./pages/landing/HomePage";
+import BrowsePage from "./pages/landing/BrowsePage";
 import AnimeDetalladoHomePage from "./pages/landing/AnimeDetalladoHomePage";
 import MangaDetalladoHomePage from "./pages/landing/MangaDetalladoHomePage";
 // ─── Paginas de autenticación ───────────────────────────────────────
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: "explorar", element: <BrowsePage /> },
       { path: "anime/:id", element: <AnimeDetalladoHomePage /> },
       { path: "manga/:id", element: <MangaDetalladoHomePage /> },
     ],

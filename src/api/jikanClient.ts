@@ -42,6 +42,8 @@ export interface CatalogoFiltros {
   estado?: string;
   orden?: string;
   pagina?: number;
+  /** Si es false, no se filtra por contenido seguro (muestra títulos para adultos) */
+  sfw?: boolean;
 }
 
 /** Tipos disponibles por medio */
@@ -169,7 +171,7 @@ export async function buscarCatalogo(f: CatalogoFiltros): Promise<CatalogoRespue
   const p = new URLSearchParams();
   p.set("page", String(f.pagina || 1));
   p.set("limit", "20");
-  p.set("sfw", "true");
+  p.set("sfw", f.sfw === false ? "false" : "true");
   if (f.q) p.set("q", f.q);
   if (f.letra) p.set("letter", f.letra);
   if (f.tipo) p.set("type", f.tipo.toLowerCase());
@@ -200,5 +202,80 @@ export async function buscarCatalogo(f: CatalogoFiltros): Promise<CatalogoRespue
   } catch {
     // Jikan no disponible (red, 429/504, caída de MyAnimeList…): respaldo local.
     return catalogoLocal(f);
+  }
+}
+
+export type Temporada = "winter" | "spring" | "summer" | "fall";
+
+/**
+ * Consulta el catálogo de una temporada y año concretos (p. ej. 2026/winter).
+ * Usa el endpoint /seasons/{year}/{season} de Jikan/Tenrai.
+ */
+export async function buscarPorTemporada(
+  anio: number,
+  temporada: Temporada,
+  pagina = 1,
+  sfw = true,
+): Promise<CatalogoRespuesta> {
+  const p = new URLSearchParams();
+  p.set("page", String(pagina));
+  p.set("limit", "20");
+  p.set("sfw", sfw ? "true" : "false");
+
+  try {
+    const json = await pedirJikan<{
+      data: JikanEntrada[];
+      pagination?: { current_page?: number; last_visible_page?: number; items?: { total?: number } };
+    }>(`/seasons/${anio}/${temporada}?${p.toString()}`);
+
+    return {
+      items: (json.data || []).map(e => normalizar(e, "anime")),
+      paginaActual: json.pagination?.current_page ?? 1,
+      ultimaPagina: Math.min(json.pagination?.last_visible_page ?? 1, 100),
+      total: json.pagination?.items?.total ?? (json.data || []).length,
+    };
+  } catch {
+    // Fallback local basado en el año (no hay datos por temporada en el respaldo).
+    return catalogoLocal({ medio: "anime", anio: String(anio), pagina, sfw });
+  }
+}
+
+// ─── Noticias de la industria (API Tenrai / Jikan) ───────────────────────────
+
+export interface Noticia {
+  id: number;
+  titulo: string;
+  extracto: string;
+  img: string;
+  fuente: string;
+  fecha: string;
+  url: string;
+}
+
+interface JikanNoticia {
+  mal_id: number;
+  title: string;
+  excerpt?: string;
+  images?: { jpg?: { image_url?: string } };
+  author_username?: string;
+  date?: string;
+  url?: string;
+}
+
+/** Devuelve las noticias recientes de la industria (anime/manga) */
+export async function obtenerNoticias(cantidad = 5): Promise<Noticia[]> {
+  try {
+    const json = await pedirJikan<{ data: JikanNoticia[] }>(`/news?limit=${cantidad}`);
+    return (json.data || []).map(n => ({
+      id: n.mal_id,
+      titulo: n.title,
+      extracto: n.excerpt ?? "",
+      img: n.images?.jpg?.image_url || "",
+      fuente: n.author_username || "ANILIST",
+      fecha: n.date || "",
+      url: n.url || "",
+    }));
+  } catch {
+    return [];
   }
 }

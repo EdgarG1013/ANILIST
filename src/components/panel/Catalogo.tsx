@@ -85,7 +85,7 @@ function Paginacion({
 }
 
 export default function Catalogo({ medio, titulo }: { medio: Medio; titulo: string }) {
-  const { enBiblioteca, agregar } = useBiblioteca();
+  const { enBiblioteca, agregar, preferencias } = useBiblioteca();
 
   const [texto, setTexto] = useState("");
   const [q, setQ] = useState("");
@@ -113,7 +113,7 @@ export default function Catalogo({ medio, titulo }: { medio: Medio; titulo: stri
     let vivo = true;
     setCargando(true);
     setError(null);
-    buscarCatalogo({ medio, q, letra, tipo, genero, anio, estado, orden, pagina })
+    buscarCatalogo({ medio, q, letra, tipo, genero, anio, estado, orden, pagina, sfw: preferencias.sfw })
       .then(r => {
         if (!vivo) return;
         setItems(r.items);
@@ -123,7 +123,7 @@ export default function Catalogo({ medio, titulo }: { medio: Medio; titulo: stri
       .catch(() => vivo && setError("No pudimos cargar el catálogo. Intenta de nuevo."))
       .finally(() => vivo && setCargando(false));
     return () => { vivo = false; };
-  }, [medio, q, letra, tipo, genero, anio, estado, orden, pagina]);
+  }, [medio, q, letra, tipo, genero, anio, estado, orden, pagina, preferencias.sfw]);
 
   const cambiar = (fn: (v: string) => void) => (v: string) => { fn(v); setPagina(1); };
 
@@ -216,7 +216,7 @@ export default function Catalogo({ medio, titulo }: { medio: Medio; titulo: stri
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
           {items.map(item => {
             const guardado = enBiblioteca(medio, item.id);
-            const rutaDetalle = medio === "anime" ? `/panel/anime/${item.id}` : `#`;
+            const rutaDetalle = medio === "anime" ? `/panel/anime/${item.id}` : `/panel/manga/${item.id}`;
             return (
               <li key={item.id}>
                 <article className="h-full bg-[#110f1a] rounded-2xl overflow-hidden border border-[#2a2140] hover:border-[#946ed9]/40 transition-colors flex flex-col">

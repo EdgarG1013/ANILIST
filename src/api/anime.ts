@@ -74,7 +74,7 @@ export const TIPO_COLORES: Record<string, string> = {
 
 export const HERO: HeroAnime[] = [
   {
-    id: 1,
+    id: 38000,
     title: "Kimetsu no Yaiba",
     altTitle: "Demon Slayer: Kimetsu no Yaiba",
     score: 8.4,
@@ -88,7 +88,7 @@ export const HERO: HeroAnime[] = [
     img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F9f93c6413e608ae491ba456fac96fb11b04917d1.webp?generation=1786160569298445&alt=media",
   },
   {
-    id: 2,
+    id: 61316,
     title: "Re:Zero kara Hajimeru",
     altTitle: "Re:Zero − Starting Life in Another World S4",
     score: 8.8,

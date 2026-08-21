@@ -283,18 +283,29 @@ export async function obtenerDetalleApi(id: number): Promise<AnimeDetalle> {
       fecha: ep.aired ?? "",
     }));
 
-    detalle.relacionados = (relaciones || []).flatMap(r =>
-      (r.entry || [])
-        .filter(e => e.type === "anime")
-        .map(e => ({
-          id: e.mal_id ?? 0,
-          title: e.name ?? "",
-          year: 0,
-          score: 0,
-          type: "TV",
-          img: "",
-        })),
+    detalle.relacionados = await Promise.all(
+      (relaciones || [])
+        .flatMap(r => (r.entry || []).filter(e => e.type === "anime").map(e => e.mal_id))
+        .filter((v): v is number => v != null && v > 0)
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .slice(0, 8)
+        .map(async id => {
+          try {
+            const { data: rel } = await pedirJikan<{ data: ApiAnime }>(`/anime/${id}`);
+            return {
+              id,
+              title: rel.title || "Sin título",
+              year: rel.year ?? rel.aired?.prop?.from?.year ?? 0,
+              score: rel.score ?? 0,
+              type: rel.type || "TV",
+              img: rel.images?.jpg?.large_image_url || rel.images?.jpg?.image_url || "",
+            };
+          } catch {
+            return { id, title: "", year: 0, score: 0, type: "TV", img: "" };
+          }
+        }),
     );
+    detalle.relacionados = detalle.relacionados.filter(r => r.img);
 
     detalle.similares = (recomendaciones || []).slice(0, 8).map(r => ({
       id: r.entry?.mal_id ?? 0,
