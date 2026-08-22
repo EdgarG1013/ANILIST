@@ -1,7 +1,7 @@
 ![anilist](./public/ANILIST.svg)
 
 
-### Pasos de Instalación
+---
 
 **1. Clonar o descargar el proyecto**
 
@@ -24,6 +24,6 @@ pnpm install
 ```bash
 pnpm run dev
 ```
-
+---
 
 
