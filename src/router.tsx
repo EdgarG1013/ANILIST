@@ -20,6 +20,7 @@ import ListasAnimePage from "./pages/panel/ListasAnimePage";
 import ListasMangaPage from "./pages/panel/ListasMangaPage";
 import GruposPage from "./pages/panel/GruposPage";
 import ConfiguracionPage from "./pages/panel/ConfiguracionPage";
+import EstadoPage from "./pages/panel/EstadoPage";
 
 // ─── Definición centralizada de rutas ─────────────────────────────────────────
 // Agrega aquí las rutas futuras del proyecto (detalle de anime/manga, etc.)
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
       { path: "configuracion", element: <ConfiguracionPage /> },
       { path: "anime/:id", element: <AnimeDetalladoPage /> },
       { path: "manga/:id", element: <MangaDetalladoPage /> },
+      { path: "estado/:medio/:id", element: <EstadoPage /> },
     ],
   },
 

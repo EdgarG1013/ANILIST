@@ -1,4 +1,5 @@
-import { ArrowLeft, Plus, Star, Tv } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Plus, Star, Tv, ClipboardList } from "lucide-react";
 import type { AnimeDetalle } from "../../api/animeDetail";
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export default function AnimeHeroBanner({ anime, onVolver }: Props) {
+  const navigate = useNavigate();
   return (
     <div className="relative" style={{ height: "480px" }}>
       <div className="absolute inset-0 overflow-hidden">
@@ -130,7 +132,7 @@ export default function AnimeHeroBanner({ anime, onVolver }: Props) {
               ))}
             </div>
 
-            {/* Acciones de lista (sin función hasta que exista el backend) */}
+            {/* Acciones de lista */}
             <div className="flex items-center gap-3 flex-wrap">
               <button
                 className="flex items-center gap-2 px-5 h-10 text-white rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
@@ -138,6 +140,14 @@ export default function AnimeHeroBanner({ anime, onVolver }: Props) {
               >
                 <Plus size={16} />
                 Añadir a mi lista
+              </button>
+              <button
+                onClick={() => navigate(`/panel/estado/anime/${anime.id}`)}
+                className="flex items-center gap-2 px-4 h-10 text-white rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ backgroundColor: "rgba(255,255,255,0.12)", backdropFilter: "blur(4px)" }}
+              >
+                <ClipboardList size={16} />
+                Estado
               </button>
               <span className="hidden sm:flex items-center gap-1.5 text-xs text-white/60">
                 <Tv size={14} />

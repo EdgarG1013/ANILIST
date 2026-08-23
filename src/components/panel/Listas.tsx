@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Trash2, GripVertical, Minus, Plus } from "lucide-react";
+import { Heart, Trash2, GripVertical, Minus, Plus, ClipboardList } from "lucide-react";
 import type { Medio } from "../../api/jikanClient";
 import {
   useBiblioteca, ESTADOS_ANIME, ESTADOS_MANGA, type Entrada, type Estado,
@@ -197,6 +197,14 @@ export default function Listas({ medio, titulo }: { medio: Medio; titulo: string
                 >
                   {estados.map(s => <option key={s.valor} value={s.valor}>{s.etiqueta}</option>)}
                 </select>
+
+                <Link
+                  to={`/panel/estado/${e.medio}/${e.id}`}
+                  aria-label={`Estado de ${e.titulo}`}
+                  className="w-9 h-9 rounded-lg border border-[#2a2140] flex items-center justify-center text-[#8b82a8] hover:text-[#b08ee8] hover:border-[#946ed9]/60 transition-colors"
+                >
+                  <ClipboardList className="w-4 h-4" />
+                </Link>
 
                 <button
                   onClick={() => actualizar(e.medio, e.id, { favorito: !e.favorito })}

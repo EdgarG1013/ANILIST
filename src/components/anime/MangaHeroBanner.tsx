@@ -1,4 +1,5 @@
-import { ArrowLeft, Star, BookOpen } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Star, BookOpen, ClipboardList } from "lucide-react";
 import type { MangaDetalle } from "../../api/mangaDetail";
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export default function MangaHeroBanner({ manga, onVolver }: Props) {
+  const navigate = useNavigate();
   return (
     <div className="relative" style={{ height: "480px" }}>
       <div className="absolute inset-0 overflow-hidden">
@@ -135,6 +137,14 @@ export default function MangaHeroBanner({ manga, onVolver }: Props) {
               >
                 <BookOpen size={16} />
                 Añadir a mi lista
+              </button>
+              <button
+                onClick={() => navigate(`/panel/estado/manga/${manga.id}`)}
+                className="flex items-center gap-2 px-4 h-10 text-white rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ backgroundColor: "rgba(255,255,255,0.12)", backdropFilter: "blur(4px)" }}
+              >
+                <ClipboardList size={16} />
+                Estado
               </button>
             </div>
           </div>
