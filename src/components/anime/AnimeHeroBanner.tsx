@@ -1,5 +1,7 @@
-import { ArrowLeft, Plus, Star, Tv } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Plus, Star, Tv, ClipboardList, Trash2 } from "lucide-react";
 import type { AnimeDetalle } from "../../api/animeDetail";
+import { useBiblioteca } from "../../store/biblioteca";
 
 interface Props {
   anime: AnimeDetalle;
@@ -7,6 +9,10 @@ interface Props {
 }
 
 export default function AnimeHeroBanner({ anime, onVolver }: Props) {
+  const navigate = useNavigate();
+  const { enBiblioteca, agregar, quitar } = useBiblioteca();
+  const guardado = enBiblioteca("anime", anime.id);
+
   return (
     <div className="relative" style={{ height: "480px" }}>
       <div className="absolute inset-0 overflow-hidden">
@@ -130,15 +136,52 @@ export default function AnimeHeroBanner({ anime, onVolver }: Props) {
               ))}
             </div>
 
-            {/* Acciones de lista (sin función hasta que exista el backend) */}
+            {/* Acciones de lista */}
             <div className="flex items-center gap-3 flex-wrap">
-              <button
-                className="flex items-center gap-2 px-5 h-10 text-white rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
-                style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)" }}
-              >
-                <Plus size={16} />
-                Añadir a mi lista
-              </button>
+              {guardado ? (
+                <>
+                  <button
+                    onClick={() => quitar("anime", anime.id)}
+                    className="flex items-center gap-2 px-5 h-10 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] bg-[#1c1928] text-[#8b82a8] border border-[#2a2140]"
+                  >
+                    <Trash2 size={16} />
+                    En mi lista
+                  </button>
+                  <button
+                    onClick={() => navigate(`/panel/estado/anime/${anime.id}`)}
+                    className="flex items-center gap-2 px-4 h-10 text-white rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                    style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)" }}
+                  >
+                    <ClipboardList size={16} />
+                    Estado
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => {
+                    agregar(
+                      {
+                        id: anime.id,
+                        title: anime.titulo,
+                        img: anime.img,
+                        type: anime.tipo,
+                        total: anime.eps,
+                        year: anime.year,
+                        score: anime.score,
+                        status: anime.estado,
+                        genres: anime.generos,
+                        synopsis: anime.sinopsis,
+                      },
+                      "anime",
+                    );
+                  }}
+                  className="flex items-center gap-2 px-5 h-10 text-white rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                  style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)" }}
+                >
+                  <Plus size={16} />
+                  Añadir a mi lista
+                </button>
+              )}
               <span className="hidden sm:flex items-center gap-1.5 text-xs text-white/60">
                 <Tv size={14} />
                 Próximamente

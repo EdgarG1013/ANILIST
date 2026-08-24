@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { FolderPlus, Trash2, Plus, GripVertical, X } from "lucide-react";
 import { useBiblioteca, type Grupo, type ListaPersonalizada } from "../../store/biblioteca";
 import DeleteConfirmModal from "../../components/compartido/DeleteConfirmModal";
+import Select from "../../components/ui/Select";
 
 // ─── Grupos: colecciones de listas personalizadas (anime + manga mezclados) ──
 
@@ -58,14 +59,12 @@ function ListaDeGrupo({
           className="flex-1 min-w-[160px] h-9 bg-[#0f0d16] border border-[#2a2140] rounded-xl px-3 text-sm font-semibold text-[#f0eefa] focus:outline-none focus:border-[#946ed9]"
           style={{ fontFamily: "'Oxanium', sans-serif" }}
         />
-        <select
-          value={orden}
-          onChange={e => setOrden(e.target.value as Orden)}
-          aria-label={`Ordenar ${lista.nombre}`}
-          className="h-9 bg-[#0f0d16] border border-[#2a2140] rounded-xl px-2 text-xs text-[#f0eefa] focus:outline-none focus:border-[#946ed9]"
-        >
-          {ORDENES.map(o => <option key={o.valor} value={o.valor}>{o.etiqueta}</option>)}
-        </select>
+        <Select
+          valor={orden}
+          onChange={v => setOrden(v as Orden)}
+          opciones={ORDENES}
+          className="w-44"
+        />
         <button
           onClick={onEliminar}
           aria-label={`Eliminar lista ${lista.nombre}`}
@@ -125,19 +124,18 @@ function ListaDeGrupo({
       )}
 
       <div className="flex gap-2">
-        <select
-          value={seleccion}
-          onChange={e => setSeleccion(e.target.value)}
-          aria-label={`Agregar título a ${lista.nombre}`}
-          className="flex-1 h-9 bg-[#0f0d16] border border-[#2a2140] rounded-xl px-2 text-xs text-[#f0eefa] focus:outline-none focus:border-[#946ed9]"
-        >
-          <option value="">Elegir de mi biblioteca…</option>
-          {disponibles.map(e => (
-            <option key={clave(e.medio, e.id)} value={clave(e.medio, e.id)}>
-              [{e.medio}] {e.titulo}
-            </option>
-          ))}
-        </select>
+        <Select
+          valor={seleccion}
+          onChange={v => setSeleccion(v)}
+          opciones={[
+            { valor: "", etiqueta: "Elegir de mi biblioteca…" },
+            ...disponibles.map(e => ({
+              valor: clave(e.medio, e.id),
+              etiqueta: `[${e.medio}] ${e.titulo}`,
+            })),
+          ]}
+          className="flex-1"
+        />
         <button
           onClick={() => { if (seleccion) { guardarItems([...lista.items, seleccion]); setSeleccion(""); } }}
           className="h-9 px-3 rounded-xl text-xs font-semibold text-white flex items-center gap-1"

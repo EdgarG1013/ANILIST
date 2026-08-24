@@ -18,6 +18,14 @@ export interface Entrada {
   progreso: number;
   total: number | null;
   favorito: boolean;
+  /** Puntuación personal del 1 al 10 (0 = sin puntuar) */
+  puntuacion: number;
+  /** Notas personales */
+  notas: string;
+  /** Fecha de inicio (ISO) */
+  fechaInicio: string;
+  /** Fecha de finalización (ISO) */
+  fechaFin: string;
   /** Fecha (ISO) en la que se agregó a la biblioteca */
   agregado: string;
   /** Posición manual dentro de su estado (menor = más arriba) */
@@ -98,8 +106,18 @@ function leer(): Guardado {
     const raw = localStorage.getItem(LLAVE);
     if (!raw) return { entradas: [], grupos: [], perfil: PERFIL_INICIAL, preferencias: PREFERENCIAS_INICIALES };
     const p = JSON.parse(raw) as Partial<Guardado>;
+    const entradas = (p.entradas ?? []).map(e => {
+      const raw = e as unknown as Record<string, unknown>;
+      return {
+        ...e,
+        puntuacion: raw.puntuacion ?? 0,
+        notas: raw.notas ?? "",
+        fechaInicio: raw.fechaInicio ?? "",
+        fechaFin: raw.fechaFin ?? "",
+      };
+    }) as Entrada[];
     return {
-      entradas: p.entradas ?? [],
+      entradas,
       grupos: p.grupos ?? [],
       perfil: { ...PERFIL_INICIAL, ...(p.perfil ?? {}) },
       preferencias: { ...PREFERENCIAS_INICIALES, ...(p.preferencias ?? {}) },
@@ -144,6 +162,10 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
             progreso: 0,
             total: item.total,
             favorito: false,
+            puntuacion: 0,
+            notas: "",
+            fechaInicio: "",
+            fechaFin: "",
             agregado: new Date().toISOString(),
             orden: prev.filter(e => e.medio === medio).length,
             etiquetas: [],
