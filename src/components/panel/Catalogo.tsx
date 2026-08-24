@@ -7,10 +7,11 @@ import {
 } from "../../api/jikanClient";
 import { useBiblioteca } from "../../store/biblioteca";
 import { TipoBadge, PuntuacionBadge } from "../landing/badges";
+import Select from "../ui/Select";
 
 // ─── Catálogo reutilizable (anime / manga) ───────────────────────────────────
 
-function Select({
+function FiltroConLabel({
   etiqueta, valor, onChange, opciones,
 }: {
   etiqueta: string;
@@ -18,21 +19,10 @@ function Select({
   onChange: (v: string) => void;
   opciones: { valor: string; etiqueta: string }[];
 }) {
-  const id = `filtro-${etiqueta.toLowerCase()}`;
   return (
     <div className="flex-1 min-w-[150px]">
-      <label htmlFor={id} className="block text-xs text-[#8b82a8] mb-1">{etiqueta}</label>
-      <select
-        id={id}
-        value={valor}
-        onChange={e => onChange(e.target.value)}
-        className="w-full h-10 bg-[#16141e] border border-[#2a2140] rounded-xl px-3 text-sm text-[#f0eefa] focus:outline-none focus:border-[#946ed9]"
-      >
-        <option value="">Seleccionar</option>
-        {opciones.map(o => (
-          <option key={o.valor} value={o.valor}>{o.etiqueta}</option>
-        ))}
-      </select>
+      <label className="block text-xs text-[#8b82a8] mb-1">{etiqueta}</label>
+      <Select valor={valor} onChange={onChange} opciones={opciones} />
     </div>
   );
 }
@@ -174,17 +164,17 @@ export default function Catalogo({ medio, titulo }: { medio: Medio; titulo: stri
 
       {/* Filtros */}
       <div className="flex flex-wrap gap-3 mb-4">
-        <Select etiqueta="Tipo" valor={tipo} onChange={cambiar(setTipo)}
+        <FiltroConLabel etiqueta="Tipo" valor={tipo} onChange={cambiar(setTipo)}
           opciones={TIPOS[medio].map(t => ({ valor: t, etiqueta: t }))} />
-        <Select etiqueta="Género" valor={genero} onChange={cambiar(setGenero)}
+        <FiltroConLabel etiqueta="Género" valor={genero} onChange={cambiar(setGenero)}
           opciones={GENEROS.map(g => ({ valor: String(g.id), etiqueta: g.nombre }))} />
-        <Select etiqueta="Año" valor={anio} onChange={cambiar(setAnio)}
+        <FiltroConLabel etiqueta="Año" valor={anio} onChange={cambiar(setAnio)}
           opciones={ANIOS.map(a => ({ valor: String(a), etiqueta: String(a) }))} />
         {medio === "anime" && (
-          <Select etiqueta="Temporada" valor={temporada} onChange={cambiar(setTemporada)}
+          <FiltroConLabel etiqueta="Temporada" valor={temporada} onChange={cambiar(setTemporada)}
             opciones={TEMPORADAS.map(t => ({ valor: t.valor, etiqueta: t.etiqueta }))} />
         )}
-        <Select etiqueta="Estado" valor={estado} onChange={cambiar(setEstado)} opciones={ESTADOS[medio]} />
+        <FiltroConLabel etiqueta="Estado" valor={estado} onChange={cambiar(setEstado)} opciones={ESTADOS[medio]} />
       </div>
 
       {/* Resumen + orden */}
@@ -193,15 +183,8 @@ export default function Catalogo({ medio, titulo }: { medio: Medio; titulo: stri
           {cargando ? "Cargando resultados…" : `${total.toLocaleString("es")} resultados`}
         </p>
         <div className="flex items-center gap-2">
-          <label htmlFor="orden-catalogo" className="text-xs text-[#8b82a8]">Ordenar por</label>
-          <select
-            id="orden-catalogo"
-            value={orden}
-            onChange={e => cambiar(setOrden)(e.target.value)}
-            className="h-9 bg-[#16141e] border border-[#2a2140] rounded-xl px-3 text-sm text-[#f0eefa] focus:outline-none focus:border-[#946ed9]"
-          >
-            {ORDENES.map(o => <option key={o.valor} value={o.valor}>{o.etiqueta}</option>)}
-          </select>
+          <label className="text-xs text-[#8b82a8]">Ordenar por</label>
+          <Select valor={orden} onChange={cambiar(setOrden)} opciones={ORDENES} className="w-52" />
         </div>
       </div>
 

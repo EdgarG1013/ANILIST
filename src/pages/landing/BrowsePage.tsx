@@ -5,6 +5,7 @@ import {
   Tag, Snowflake, Flower2, Sun, Leaf, ChevronLeft, ChevronRight, AlertCircle,
 } from "lucide-react";
 import AnimeCard, { type AnimeCardData } from "../../components/landing/AnimeCard";
+import Select from "../../components/ui/Select";
 import {
   buscarCatalogo, buscarPorTemporada, TIPOS, ESTADOS, GENEROS,
   type Temporada,
@@ -207,62 +208,48 @@ export default function BrowsePage() {
       {/* Filtros */}
       <div className="flex flex-wrap gap-3 mb-6">
         {!FORMAT_PAGES.includes(tipo) && tipo !== "season-archive" && (
-          <select
-            value={urlTipo}
-            onChange={e => {
+          <Select
+            valor={urlTipo}
+            onChange={v => {
               const p = new URLSearchParams(params);
-              if (e.target.value) p.set("filter", e.target.value);
+              if (v) p.set("filter", v);
               else p.delete("filter");
               p.delete("page");
               setParams(p, { replace: true });
             }}
-            aria-label="Filtrar por tipo"
-            className="h-9 bg-[#16141e] border border-[#2a2140] rounded-xl px-3 text-sm text-[#f0eefa] focus:outline-none focus:border-[#946ed9]"
-          >
-            <option value="">Tipo: Todos</option>
-            {TIPOS.anime.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+            opciones={[{ valor: "", etiqueta: "Tipo: Todos" }, ...TIPOS.anime.map(t => ({ valor: t, etiqueta: t }))]}
+            className="w-44"
+          />
         )}
 
         {tipo !== "season-archive" && (
-          <select
-            value={generoSeleccionado}
-            onChange={e => {
+          <Select
+            valor={generoSeleccionado}
+            onChange={v => {
               const p = new URLSearchParams(params);
-              if (e.target.value) {
-                if (tipo === "genre") p.set("genre", e.target.value);
-                else p.set("genre", e.target.value);
-              } else {
-                if (tipo === "genre") p.delete("genre");
-                else p.delete("genre");
-              }
+              if (v) p.set("genre", v);
+              else p.delete("genre");
               p.delete("page");
               setParams(p, { replace: true });
             }}
-            aria-label="Filtrar por género"
-            className="h-9 bg-[#16141e] border border-[#2a2140] rounded-xl px-3 text-sm text-[#f0eefa] focus:outline-none focus:border-[#946ed9]"
-          >
-            <option value="">Género: Todos</option>
-            {GENEROS.map(g => <option key={g.id} value={String(g.id)}>{g.nombre}</option>)}
-          </select>
+            opciones={[{ valor: "", etiqueta: "Género: Todos" }, ...GENEROS.map(g => ({ valor: String(g.id), etiqueta: g.nombre }))]}
+            className="w-48"
+          />
         )}
 
         {tipo === "popular" && (
-          <select
-            value={urlEstado}
-            onChange={e => {
+          <Select
+            valor={urlEstado}
+            onChange={v => {
               const p = new URLSearchParams(params);
-              if (e.target.value) p.set("status", e.target.value);
+              if (v) p.set("status", v);
               else p.delete("status");
               p.delete("page");
               setParams(p, { replace: true });
             }}
-            aria-label="Filtrar por estado"
-            className="h-9 bg-[#16141e] border border-[#2a2140] rounded-xl px-3 text-sm text-[#f0eefa] focus:outline-none focus:border-[#946ed9]"
-          >
-            <option value="">Estado: Todos</option>
-            {ESTADOS.anime.map(s => <option key={s.valor} value={s.valor}>{s.etiqueta}</option>)}
-          </select>
+            opciones={[{ valor: "", etiqueta: "Estado: Todos" }, ...ESTADOS.anime.map(s => ({ valor: s.valor, etiqueta: s.etiqueta }))]}
+            className="w-48"
+          />
         )}
       </div>
 

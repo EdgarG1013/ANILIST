@@ -4,6 +4,7 @@ import { ArrowLeft, Star, Save, Loader2 } from "lucide-react";
 import { useBiblioteca, ESTADOS_ANIME, ESTADOS_MANGA, type Estado } from "../../store/biblioteca";
 import { pedirJikan } from "../../api/jikanClient";
 import type { Medio } from "../../api/jikanClient";
+import Select from "../../components/ui/Select";
 
 // ─── Página reutilizable para gestionar el estado de un anime/manga ─────────
 
@@ -155,17 +156,12 @@ export default function EstadoPage() {
             {/* Estado + Progreso */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="estado-select" className="block text-sm text-[#8b82a8] mb-1.5">Estado</label>
-                <select
-                  id="estado-select"
-                  value={estado}
-                  onChange={e => setEstado(e.target.value as Estado)}
-                  className="w-full h-11 bg-[#16141e] border border-[#2a2140] rounded-xl px-3 text-sm text-[#f0eefa] focus:outline-none focus:border-[#946ed9]"
-                >
-                  {estados.map(s => (
-                    <option key={s.valor} value={s.valor}>{s.etiqueta}</option>
-                  ))}
-                </select>
+                <label className="block text-sm text-[#8b82a8] mb-1.5">Estado</label>
+                <Select
+                  valor={estado}
+                  onChange={v => setEstado(v as Estado)}
+                  opciones={estados}
+                />
               </div>
               <div>
                 <label htmlFor="progreso-input" className="block text-sm text-[#8b82a8] mb-1.5">

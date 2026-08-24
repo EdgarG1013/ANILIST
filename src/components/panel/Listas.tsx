@@ -6,6 +6,7 @@ import {
   useBiblioteca, ESTADOS_ANIME, ESTADOS_MANGA, type Entrada, type Estado,
 } from "../../store/biblioteca";
 import DeleteConfirmModal from "../compartido/DeleteConfirmModal";
+import Select from "../ui/Select";
 
 // ─── Listas clásicas con ordenamiento personalizable ─────────────────────────
 
@@ -90,17 +91,13 @@ export default function Listas({ medio, titulo }: { medio: Medio; titulo: string
 
       {/* Ordenamiento */}
       <div className="flex flex-wrap items-center gap-2 mb-5">
-        <label htmlFor="orden-lista" className="text-xs text-[#8b82a8]">Ordenar por</label>
-        <select
-          id="orden-lista"
-          value={orden}
-          onChange={e => setOrden(e.target.value as Orden)}
-          className="h-9 bg-[#16141e] border border-[#2a2140] rounded-xl px-3 text-sm text-[#f0eefa] focus:outline-none focus:border-[#946ed9]"
-        >
-          {ORDENES.filter(o => o.valor !== "manual" || seccion !== "todos").map(o => (
-            <option key={o.valor} value={o.valor}>{o.etiqueta}</option>
-          ))}
-        </select>
+        <label className="text-xs text-[#8b82a8]">Ordenar por</label>
+        <Select
+          valor={orden}
+          onChange={v => setOrden(v as Orden)}
+          opciones={ORDENES.filter(o => o.valor !== "manual" || seccion !== "todos")}
+          className="w-56"
+        />
         {manualActivo && (
           <span className="text-xs text-[#8b82a8]">
             Arrastra las filas o escribe el número de posición para reordenar.
@@ -189,14 +186,12 @@ export default function Listas({ medio, titulo }: { medio: Medio; titulo: string
                 </div>
 
                 {/* Estado */}
-                <select
-                  value={e.estado}
-                  onChange={ev => actualizar(e.medio, e.id, { estado: ev.target.value as Estado })}
-                  aria-label={`Estado de ${e.titulo}`}
-                  className="h-9 bg-[#16141e] border border-[#2a2140] rounded-xl px-2 text-xs text-[#f0eefa] focus:outline-none focus:border-[#946ed9]"
-                >
-                  {estados.map(s => <option key={s.valor} value={s.valor}>{s.etiqueta}</option>)}
-                </select>
+                <Select
+                  valor={e.estado}
+                  onChange={v => actualizar(e.medio, e.id, { estado: v as Estado })}
+                  opciones={estados}
+                  className="w-36"
+                />
 
                 <Link
                   to={`/panel/estado/${e.medio}/${e.id}`}

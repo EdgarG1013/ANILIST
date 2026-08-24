@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, BookOpen, ClipboardList } from "lucide-react";
+import { ArrowLeft, Star, BookOpen, ClipboardList, Trash2 } from "lucide-react";
 import type { MangaDetalle } from "../../api/mangaDetail";
+import { useBiblioteca } from "../../store/biblioteca";
 
 interface Props {
   manga: MangaDetalle;
@@ -9,6 +10,9 @@ interface Props {
 
 export default function MangaHeroBanner({ manga, onVolver }: Props) {
   const navigate = useNavigate();
+  const { enBiblioteca, agregar, quitar } = useBiblioteca();
+  const guardado = enBiblioteca("manga", manga.id);
+
   return (
     <div className="relative" style={{ height: "480px" }}>
       <div className="absolute inset-0 overflow-hidden">
@@ -130,22 +134,52 @@ export default function MangaHeroBanner({ manga, onVolver }: Props) {
               ))}
             </div>
 
+            {/* Acciones de lista */}
             <div className="flex items-center gap-3 flex-wrap">
-              <button
-                className="flex items-center gap-2 px-5 h-10 text-white rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
-                style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)" }}
-              >
-                <BookOpen size={16} />
-                Añadir a mi lista
-              </button>
-              <button
-                onClick={() => navigate(`/panel/estado/manga/${manga.id}`)}
-                className="flex items-center gap-2 px-4 h-10 text-white rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
-                style={{ backgroundColor: "rgba(255,255,255,0.12)", backdropFilter: "blur(4px)" }}
-              >
-                <ClipboardList size={16} />
-                Estado
-              </button>
+              {guardado ? (
+                <>
+                  <button
+                    onClick={() => quitar("manga", manga.id)}
+                    className="flex items-center gap-2 px-5 h-10 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] bg-[#1c1928] text-[#8b82a8] border border-[#2a2140]"
+                  >
+                    <Trash2 size={16} />
+                    En mi lista
+                  </button>
+                  <button
+                    onClick={() => navigate(`/panel/estado/manga/${manga.id}`)}
+                    className="flex items-center gap-2 px-4 h-10 text-white rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                    style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)" }}
+                  >
+                    <ClipboardList size={16} />
+                    Estado
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => {
+                    agregar(
+                      {
+                        id: manga.id,
+                        title: manga.titulo,
+                        img: manga.img,
+                        type: manga.tipo,
+                        total: manga.capitulos,
+                        year: manga.year,
+                        score: manga.score,
+                        status: manga.estado,
+                        genres: manga.generos,
+                        synopsis: manga.sinopsis,
+                      },
+                      "manga",
+                    );
+                  }}
+                  className="flex items-center gap-2 px-5 h-10 text-white rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98]"
+                  style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)" }}
+                >
+                  <BookOpen size={16} />
+                  Añadir a mi lista
+                </button>
+              )}
             </div>
           </div>
         </div>
