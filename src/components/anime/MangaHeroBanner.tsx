@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Star, BookOpen, ClipboardList, Trash2 } from "lucide-react";
 import type { MangaDetalle } from "../../api/mangaDetail";
 import { useBiblioteca } from "../../store/biblioteca";
+import DeleteConfirmModal from "../compartido/DeleteConfirmModal";
 
 interface Props {
   manga: MangaDetalle;
@@ -12,6 +14,7 @@ export default function MangaHeroBanner({ manga, onVolver }: Props) {
   const navigate = useNavigate();
   const { enBiblioteca, agregar, quitar } = useBiblioteca();
   const guardado = enBiblioteca("manga", manga.id);
+  const [modalAbierto, setModalAbierto] = useState(false);
 
   return (
     <div className="relative" style={{ height: "480px" }}>
@@ -139,7 +142,7 @@ export default function MangaHeroBanner({ manga, onVolver }: Props) {
               {guardado ? (
                 <>
                   <button
-                    onClick={() => quitar("manga", manga.id)}
+                    onClick={() => setModalAbierto(true)}
                     className="flex items-center gap-2 px-5 h-10 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] bg-[#1c1928] text-[#8b82a8] border border-[#2a2140]"
                   >
                     <Trash2 size={16} />
@@ -184,6 +187,14 @@ export default function MangaHeroBanner({ manga, onVolver }: Props) {
           </div>
         </div>
       </div>
+
+      <DeleteConfirmModal
+        isOpen={modalAbierto}
+        onClose={() => setModalAbierto(false)}
+        onConfirm={() => { quitar("manga", manga.id); setModalAbierto(false); }}
+        title={manga.titulo}
+        itemLabel="manga de mi lista"
+      />
     </div>
   );
 }
