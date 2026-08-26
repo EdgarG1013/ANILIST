@@ -179,3 +179,27 @@
     line-height: 1.5;
   }
 }
+
+/* ─── Scrollbar personalizado para menús desplegables ─────────────────────── */
+
+.select-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #2a2140 transparent;
+}
+
+.select-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.select-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.select-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #2a2140;
+  border-radius: 9999px;
+}
+
+.select-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #946ed9;
+}

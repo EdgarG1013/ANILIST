@@ -17,11 +17,13 @@ interface SelectProps {
   className?: string;
 }
 
-export default function Select({ valor, onChange, opciones, placeholder = "Seleccionar", className = "" }: SelectProps) {
+export default function Select({ valor, onChange, opciones, placeholder = "Todos", className = "" }: SelectProps) {
   const [abierto, setAbierto] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const etiquetaActual = opciones.find(o => o.valor === valor)?.etiqueta ?? placeholder;
+  const etiquetaActual = valor
+    ? opciones.find(o => o.valor === valor)?.etiqueta ?? valor
+    : placeholder;
 
   // Cerrar al hacer clic fuera
   useEffect(() => {
@@ -58,7 +60,7 @@ export default function Select({ valor, onChange, opciones, placeholder = "Selec
 
       {abierto && (
         <div
-          className="absolute z-50 mt-1.5 w-full max-h-60 overflow-auto rounded-xl border border-[#2a2140] shadow-2xl"
+          className="absolute z-50 mt-1.5 w-full max-h-60 overflow-y-auto rounded-xl border border-[#2a2140] shadow-2xl select-scrollbar"
           style={{ backgroundColor: "#16141e", boxShadow: "0 15px 40px rgba(0,0,0,0.5)" }}
         >
           {opciones.map(o => {
@@ -67,7 +69,7 @@ export default function Select({ valor, onChange, opciones, placeholder = "Selec
               <button
                 key={o.valor}
                 type="button"
-                onClick={() => { onChange(o.valor); setAbierto(false); }}
+                onClick={() => { onChange(seleccionado ? "" : o.valor); setAbierto(false); }}
                 className={`w-full px-3 py-2.5 text-sm text-left flex items-center justify-between gap-2 transition-colors ${
                   seleccionado
                     ? "bg-[#946ed9]/15 text-[#b08ee8]"
