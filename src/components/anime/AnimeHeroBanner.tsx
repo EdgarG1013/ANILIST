@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Star, Tv, ClipboardList, Trash2 } from "lucide-react";
 import type { AnimeDetalle } from "../../api/animeDetail";
 import { useBiblioteca } from "../../store/biblioteca";
+import { useAuth } from "../../store/auth";
 import DeleteConfirmModal from "../compartido/DeleteConfirmModal";
+import AuthModal from "../compartido/AuthModal";
 
 interface Props {
   anime: AnimeDetalle;
@@ -13,8 +15,10 @@ interface Props {
 export default function AnimeHeroBanner({ anime, onVolver }: Props) {
   const navigate = useNavigate();
   const { enBiblioteca, agregar, quitar } = useBiblioteca();
+  const { autenticado } = useAuth();
   const guardado = enBiblioteca("anime", anime.id);
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [authModalAbierto, setAuthModalAbierto] = useState(false);
 
   return (
     <div className="relative" style={{ height: "480px" }}>
@@ -162,6 +166,7 @@ export default function AnimeHeroBanner({ anime, onVolver }: Props) {
               ) : (
                 <button
                   onClick={() => {
+                    if (!autenticado) { setAuthModalAbierto(true); return; }
                     agregar(
                       {
                         id: anime.id,
@@ -201,6 +206,7 @@ export default function AnimeHeroBanner({ anime, onVolver }: Props) {
         title={anime.titulo}
         itemLabel="anime de mi lista"
       />
+      <AuthModal isOpen={authModalAbierto} onClose={() => setAuthModalAbierto(false)} />
     </div>
   );
 }
