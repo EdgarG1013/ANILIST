@@ -5,7 +5,7 @@ import {
   ListVideo, ListChecks, FolderKanban, Settings, User,
 } from "lucide-react";
 import logo from "../../assets/logo.svg";
-import { BibliotecaProvider, useBiblioteca } from "../../store/biblioteca";
+import { useBiblioteca } from "../../store/biblioteca";
 import { useAuth } from "../../store/auth";
 
 // ─── Enlaces del menú lateral ────────────────────────────────────────────────
@@ -162,7 +162,6 @@ export default function PanelLayout() {
   const [menu, setMenu] = useState(false);
 
   return (
-    <BibliotecaProvider>
       <div
         className="min-h-dvh bg-[#0a0910] text-[#f0eefa]"
         style={{ fontFamily: "'DM Sans', sans-serif" }}
@@ -175,6 +174,5 @@ export default function PanelLayout() {
           </main>
         </div>
       </div>
-    </BibliotecaProvider>
   );
 }

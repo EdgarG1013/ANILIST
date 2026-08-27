@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Star, Tv, ClipboardList, Trash2 } from "lucide-react";
 import type { AnimeDetalle } from "../../api/animeDetail";
 import { useBiblioteca } from "../../store/biblioteca";
+import DeleteConfirmModal from "../compartido/DeleteConfirmModal";
 
 interface Props {
   anime: AnimeDetalle;
@@ -12,6 +14,7 @@ export default function AnimeHeroBanner({ anime, onVolver }: Props) {
   const navigate = useNavigate();
   const { enBiblioteca, agregar, quitar } = useBiblioteca();
   const guardado = enBiblioteca("anime", anime.id);
+  const [modalAbierto, setModalAbierto] = useState(false);
 
   return (
     <div className="relative" style={{ height: "480px" }}>
@@ -141,7 +144,7 @@ export default function AnimeHeroBanner({ anime, onVolver }: Props) {
               {guardado ? (
                 <>
                   <button
-                    onClick={() => quitar("anime", anime.id)}
+                    onClick={() => setModalAbierto(true)}
                     className="flex items-center gap-2 px-5 h-10 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] bg-[#1c1928] text-[#8b82a8] border border-[#2a2140]"
                   >
                     <Trash2 size={16} />
@@ -190,6 +193,14 @@ export default function AnimeHeroBanner({ anime, onVolver }: Props) {
           </div>
         </div>
       </div>
+
+      <DeleteConfirmModal
+        isOpen={modalAbierto}
+        onClose={() => setModalAbierto(false)}
+        onConfirm={() => { quitar("anime", anime.id); setModalAbierto(false); }}
+        title={anime.titulo}
+        itemLabel="anime de mi lista"
+      />
     </div>
   );
 }

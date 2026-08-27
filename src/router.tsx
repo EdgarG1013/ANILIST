@@ -13,6 +13,7 @@ import RecuperacionPasswordPage from "./pages/autenticacion/RecuperacionPassword
 import AnimeDetalladoPage from "./pages/anime/AnimeDetalladoPage";
 import MangaDetalladoPage from "./pages/manga/MangaDetalladoPage";
 import PanelLayout from "./components/panel/PanelLayout";
+import { BibliotecaProvider } from "./store/biblioteca";
 import InicioPage from "./pages/panel/InicioPage";
 import CatalogoAnimePage from "./pages/panel/CatalogoAnimePage";
 import CatalogoMangaPage from "./pages/panel/CatalogoMangaPage";
@@ -44,7 +45,7 @@ export const router = createBrowserRouter([
   // paginas del panel de usuario
   {
     path: "/panel",
-    element: <PanelLayout />,
+    element: <BibliotecaProvider><PanelLayout /></BibliotecaProvider>,
     children: [
       { index: true, element: <InicioPage /> },
       { path: "catalogo-anime", element: <CatalogoAnimePage /> },
