@@ -8,6 +8,8 @@ import AnimeTrailer from "../../components/anime/AnimeTrailer";
 import AnimeCharacters from "../../components/anime/AnimeCharacters";
 import AnimeEpisodes from "../../components/anime/AnimeEpisodes";
 import AnimeInfoSidebar from "../../components/anime/AnimeInfoSidebar";
+import AnimeStreaming from "../../components/anime/AnimeStreaming";
+import AnimeOfficialSite from "../../components/anime/AnimeOfficialSite";
 import AnimeHorizontalCarousel from "../../components/anime/AnimeHorizontalCarousel";
 import DetalleSkeleton from "../../components/compartido/DetalleSkeleton";
 
@@ -95,7 +97,11 @@ export default function AnimeDetailsPage() {
           </div>
 
           {/* Columna derecha */}
-          <AnimeInfoSidebar anime={anime} />
+          <div className="space-y-6">
+            <AnimeInfoSidebar anime={anime} />
+            <AnimeStreaming streaming={anime.streaming} />
+            <AnimeOfficialSite externales={anime.externales} />
+          </div>
         </div>
       </main>
     </div>
