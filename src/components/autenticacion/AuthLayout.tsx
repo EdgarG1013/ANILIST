@@ -38,7 +38,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         className="hidden lg:flex flex-col justify-center flex-1 px-12 xl:px-20 border-r border-[#2a2140] relative"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(10, 9, 16, 0.82), rgba(10, 9, 16, 0.9)), url('/src/assets/bg-auth.jpg')",
+            "linear-gradient(rgba(10, 9, 16, 0.7), rgba(10, 9, 16, 0.7)), url('/src/assets/bg-auth.webp')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
