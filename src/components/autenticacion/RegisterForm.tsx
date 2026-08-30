@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
 import { Field, PasswordField, Checkbox, Divider, BtnPrimary } from "../ui/FormFields";
 import { useAuth } from "../../store/auth";
+import { getOAuthRedirectUrl } from "../../api/authService";
 
 // ─── Formulario de registro (lógica) ─────────────────────────────────────────
 
@@ -251,6 +252,7 @@ export default function RegisterForm() {
         {/* Botón de Google */}
         <button
           type="button"
+          onClick={() => { window.location.href = getOAuthRedirectUrl('google'); }}
           className="flex items-center justify-center gap-2 h-11 rounded-xl border border-[#2a2140] bg-[#0d0b16] hover:border-[#946ed9]/40 hover:bg-[#130f22] transition-all text-sm text-[#c4bbd8] font-medium"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -265,6 +267,7 @@ export default function RegisterForm() {
         {/* Botón de Discord */}
         <button
           type="button"
+          onClick={() => { window.location.href = getOAuthRedirectUrl('discord'); }}
           className="flex items-center justify-center gap-2 h-11 rounded-xl border border-[#2a2140] bg-[#0d0b16] hover:border-[#946ed9]/40 hover:bg-[#130f22] transition-all text-sm text-[#c4bbd8] font-medium"
         >
           <svg className="h-5 w-5" viewBox="0 0 127.14 96.36">

@@ -117,6 +117,16 @@ export const restablecerContrasena = async (
 };
 
 // ============================================================
+// OAUTH
+// ============================================================
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+export const getOAuthRedirectUrl = (provider: 'google' | 'discord'): string => {
+  return `${backendUrl}/auth/${provider}`;
+};
+
+// ============================================================
 // UTILIDADES LOCALES
 // ============================================================
 

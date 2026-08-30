@@ -11,6 +11,7 @@ import RegistroPage from "./pages/autenticacion/RegistroPage";
 import RecuperacionPasswordPage from "./pages/autenticacion/RecuperacionPasswordPage";
 import RestablecerPasswordPage from "./pages/autenticacion/RestablecerPasswordPage";
 import VerificarEmailPage from "./pages/autenticacion/VerificarEmailPage";
+import AuthCallbackPage from "./pages/autenticacion/AuthCallbackPage";
 // ─── Protección de rutas ────────────────────────────────────────────
 import ProtectedRoute from "./components/ProtectedRoute";
 // ─── Paginas del panel de usuario ─────────────────────────────────
@@ -47,6 +48,7 @@ export const router = createBrowserRouter([
   { path: "/recuperar-password", element: <RecuperacionPasswordPage /> },
   { path: "/restablecer-password", element: <RestablecerPasswordPage /> },
   { path: "/verificar-email", element: <VerificarEmailPage /> },
+  { path: "/auth/callback", element: <AuthCallbackPage /> },
 
   // paginas del panel de usuario (protegidas)
   {
