@@ -18,31 +18,29 @@ function validar(identificador: string, contrasena: string) {
 
 export default function LoginForm() {
   const navigate = useNavigate();
-  const { iniciarSesion } = useAuth();
+  const { login } = useAuth();
   const [identificador, setIdentificador] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [recuerdame, setRecuerdame] = useState(false);
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [cargando, setCargando] = useState(false);
 
-  function handleSubmit(ev: React.FormEvent) {
+  async function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault();
     const e = validar(identificador, contrasena);
     setErrores(e);
     if (Object.keys(e).length > 0) return;
 
-    // Simula la llamada a la API de autenticación
     setCargando(true);
-    setTimeout(() => {
-      setCargando(false);
-      iniciarSesion({
-        id: crypto.randomUUID(),
-        nombre: identificador,
-        correo: identificador.includes("@") ? identificador : `${identificador}@anilist.app`,
-        avatar: "",
-      });
+    try {
+      await login(identificador, contrasena);
       navigate("/panel");
-    }, 900);
+    } catch (err: any) {
+      const msg = err?.response?.data?.mensaje || "Credenciales incorrectas. Intenta de nuevo.";
+      setErrores({ general: msg });
+    } finally {
+      setCargando(false);
+    }
   }
 
   return (
@@ -57,6 +55,13 @@ export default function LoginForm() {
         </h2>
         <p className="text-sm text-[#8b82a8] mt-1">No te pierdas tus anime favoritos</p>
       </div>
+
+      {/* Error general */}
+      {errores.general && (
+        <p className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2.5">
+          {errores.general}
+        </p>
+      )}
 
       {/* Campos del formulario */}
       <Field

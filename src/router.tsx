@@ -9,6 +9,8 @@ import MangaDetalladoHomePage from "./pages/landing/MangaDetalladoHomePage";
 import IniciarSesionPage from "./pages/autenticacion/IniciarSesionPage";
 import RegistroPage from "./pages/autenticacion/RegistroPage";
 import RecuperacionPasswordPage from "./pages/autenticacion/RecuperacionPasswordPage";
+import RestablecerPasswordPage from "./pages/autenticacion/RestablecerPasswordPage";
+import VerificarEmailPage from "./pages/autenticacion/VerificarEmailPage";
 // ─── Protección de rutas ────────────────────────────────────────────
 import ProtectedRoute from "./components/ProtectedRoute";
 // ─── Paginas del panel de usuario ─────────────────────────────────
@@ -43,6 +45,8 @@ export const router = createBrowserRouter([
   { path: "/iniciar-sesion", element: <IniciarSesionPage /> },
   { path: "/registro", element: <RegistroPage /> },
   { path: "/recuperar-password", element: <RecuperacionPasswordPage /> },
+  { path: "/restablecer-password", element: <RestablecerPasswordPage /> },
+  { path: "/verificar-email", element: <VerificarEmailPage /> },
 
   // paginas del panel de usuario (protegidas)
   {
