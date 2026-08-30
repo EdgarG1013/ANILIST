@@ -83,7 +83,7 @@ export default function RegisterForm() {
     setCargando(true);
     setTimeout(() => {
       setCargando(false);
-      iniciarSesion({ nombre: usuario, correo: email, avatar: "" });
+      iniciarSesion({ id: crypto.randomUUID(), nombre: usuario, correo: email, avatar: "" });
       navigate("/");
     }, 900);
   }

@@ -13,7 +13,7 @@ const ENLACES_NAV = [
   { etiqueta: "Más Populares", ruta: "/explorar?type=popular" },
 ] as const;
 
-function Avatar({ avatar }: { avatar: string }) {
+function Avatar({ avatar }: { avatar: string | null }) {
   return (
     <span className="w-7 h-7 rounded-full bg-[#1c1928] border border-[#2a2140] overflow-hidden flex items-center justify-center shrink-0">
       {avatar

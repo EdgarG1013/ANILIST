@@ -36,6 +36,7 @@ export default function LoginForm() {
     setTimeout(() => {
       setCargando(false);
       iniciarSesion({
+        id: crypto.randomUUID(),
         nombre: identificador,
         correo: identificador.includes("@") ? identificador : `${identificador}@anilist.app`,
         avatar: "",
