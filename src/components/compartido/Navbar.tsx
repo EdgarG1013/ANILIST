@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, LayoutDashboard, User } from "lucide-react";
+import { Menu, X, LayoutDashboard } from "lucide-react";
 import logo from "../../assets/logo.svg";
 import { useAuth } from "../../store/auth";
 import SearchBar from "./SearchBar";
@@ -13,12 +13,12 @@ const ENLACES_NAV = [
   { etiqueta: "Más Populares", ruta: "/explorar?type=popular" },
 ] as const;
 
-function Avatar({ avatar }: { avatar: string | null }) {
+function Avatar({ avatar, nombre }: { avatar: string | null; nombre?: string }) {
   return (
     <span className="w-7 h-7 rounded-full bg-[#1c1928] border border-[#2a2140] overflow-hidden flex items-center justify-center shrink-0">
       {avatar
         ? <img src={avatar} alt="" className="w-full h-full object-cover" />
-        : <User className="w-3.5 h-3.5 text-[#8b82a8]" />}
+        : <span className="text-[10px] font-bold text-[#946ed9]">{(nombre ?? "?")[0].toUpperCase()}</span>}
     </span>
   );
 }
@@ -65,7 +65,7 @@ export default function Navbar() {
               className="h-9 px-3 pl-2 flex items-center gap-2 text-sm font-semibold text-white rounded-xl border border-[#946ed9]/60 hover:border-[#b08ee8] hover:opacity-95 transition-all"
               style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)", fontFamily: "'Oxanium', sans-serif" }}
             >
-              <Avatar avatar={usuario!.avatar} />
+              <Avatar avatar={usuario!.avatar} nombre={usuario!.nombre} />
               Dashboard
             </Link>
           ) : (

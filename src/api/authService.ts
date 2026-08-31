@@ -5,6 +5,10 @@ export interface UsuarioAuth {
   nombre: string;
   correo: string;
   avatar: string | null;
+  preferencias: {
+    id: string;
+    sfw: boolean;
+  } | null;
 }
 
 export interface AuthResponse {
