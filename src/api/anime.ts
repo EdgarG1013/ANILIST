@@ -64,10 +64,10 @@ export function toPopularAnime(a: AnimePopular): PopularItem {
 // ─── Colores por tipo de anime ────────────────────────────────────────────────
 
 export const TIPO_COLORES: Record<string, string> = {
-  TV: "bg-[#6b3fa0]",
-  ONA: "bg-[#0097a7]",
-  OVA: "bg-[#388e3c]",
-  Movie: "bg-[#d97706]",
+  TV: "#6b3fa0",
+  ONA: "#0097a7",
+  OVA: "#388e3c",
+  Movie: "#d97706",
 };
 
 // ─── Hero — carrusel principal ────────────────────────────────────────────────

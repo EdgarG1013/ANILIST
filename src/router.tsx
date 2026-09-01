@@ -25,6 +25,7 @@ import CatalogoMangaPage from "./pages/panel/CatalogoMangaPage";
 import ListasAnimePage from "./pages/panel/ListasAnimePage";
 import ListasMangaPage from "./pages/panel/ListasMangaPage";
 import GruposPage from "./pages/panel/GruposPage";
+import GrupoDetalladoPage from "./pages/panel/GrupoDetallePage";
 import ConfiguracionPage from "./pages/panel/ConfiguracionPage";
 import EstadoPage from "./pages/panel/EstadoPage";
 
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
           { path: "listas-anime", element: <ListasAnimePage /> },
           { path: "listas-manga", element: <ListasMangaPage /> },
           { path: "grupos", element: <GruposPage /> },
+          { path: "grupos/:id", element: <GrupoDetalladoPage /> },
           { path: "configuracion", element: <ConfiguracionPage /> },
           { path: "anime/:id", element: <AnimeDetalladoPage /> },
           { path: "manga/:id", element: <MangaDetalladoPage /> },

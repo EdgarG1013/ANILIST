@@ -41,12 +41,25 @@ export interface ListaPersonalizada {
   orden: number;
 }
 
+/** Título añadido a un grupo que no está en la biblioteca personal */
+export interface ItemExterno {
+  /** clave "medio:id" */
+  clave: string;
+  id: number;
+  medio: Medio;
+  titulo: string;
+  img: string;
+  tipo: string;
+}
+
 export interface Grupo {
   id: string;
   titulo: string;
   descripcion: string;
+  portada: string;
   etiquetas: string[];
   listas: ListaPersonalizada[];
+  externos: ItemExterno[];
   creado: string;
 }
 
@@ -72,7 +85,7 @@ interface BibliotecaCtx {
   quitar: (medio: Medio, id: number) => void;
   actualizar: (medio: Medio, id: number, cambios: Partial<Entrada>) => void;
   reordenar: (medio: Medio, estado: Estado | "todos", clavesOrdenadas: string[]) => void;
-  crearGrupo: (g: Omit<Grupo, "id" | "creado" | "listas">) => void;
+  crearGrupo: (g: Omit<Grupo, "id" | "creado" | "listas" | "externos">) => void;
   actualizarGrupo: (id: string, cambios: Partial<Grupo>) => void;
   eliminarGrupo: (id: string) => void;
   setPerfil: (p: Partial<Perfil>) => void;
@@ -119,7 +132,7 @@ function leer(): Guardado {
     }) as Entrada[];
     return {
       entradas,
-      grupos: p.grupos ?? [],
+      grupos: (p.grupos ?? []).map(g => ({ ...g, portada: g.portada ?? "", externos: g.externos ?? [] })),
       perfil: { ...PERFIL_INICIAL, ...(p.perfil ?? {}) },
       preferencias: { ...PREFERENCIAS_INICIALES, ...(p.preferencias ?? {}) },
     };
@@ -191,7 +204,7 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
     crearGrupo: g =>
       setGrupos(prev => [
         ...prev,
-        { ...g, id: crypto.randomUUID(), creado: new Date().toISOString(), listas: [] },
+        { ...g, id: crypto.randomUUID(), creado: new Date().toISOString(), listas: [], externos: [] },
       ]),
     actualizarGrupo: (id, cambios) =>
       setGrupos(prev => prev.map(g => (g.id === id ? { ...g, ...cambios } : g))),
