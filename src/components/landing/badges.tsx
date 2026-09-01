@@ -4,9 +4,12 @@ import { TIPO_COLORES } from "../../api/anime";
 // ─── Badge de tipo de anime (TV, ONA, OVA, Movie) ────────────────────────────
 
 export function TipoBadge({ tipo, className = "" }: { tipo: string; className?: string }) {
-  const color = TIPO_COLORES[tipo] ?? "bg-[#6b3fa0]";
+  const color = TIPO_COLORES[tipo] ?? "#6b3fa0";
   return (
-    <span className={`text-white text-[11px] font-semibold px-2 py-0.5 rounded-md uppercase tracking-wide ${color} ${className}`}>
+    <span
+      className={`text-white text-[11px] font-semibold px-2 py-0.5 rounded-md uppercase tracking-wide ${className}`}
+      style={{ backgroundColor: color }}
+    >
       {tipo}
     </span>
   );
