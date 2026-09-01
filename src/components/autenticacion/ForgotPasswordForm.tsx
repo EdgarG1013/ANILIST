@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Field, BtnPrimary } from "../ui/FormFields";
+import { olvidarContrasena } from "../../api/authService";
 
 // ─── Formulario de recuperación de contraseña (lógica) ───────────────────────
 
@@ -12,6 +13,7 @@ export default function ForgotPasswordForm() {
   const [errorEmail, setErrorEmail] = useState("");
   const [cargando, setCargando] = useState(false);
   const [enviado, setEnviado] = useState(false);
+  const [errorApi, setErrorApi] = useState("");
   /** Contador de segundos restantes para poder reenviar */
   const [countdown, setCountdown] = useState(0);
 
@@ -28,29 +30,39 @@ export default function ForgotPasswordForm() {
     return "";
   }
 
-  function handleSubmit(ev: React.FormEvent) {
+  async function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault();
     const err = validarEmail();
     setErrorEmail(err);
     if (err) return;
 
-    // Simula el envío del email de recuperación
     setCargando(true);
-    setTimeout(() => {
-      setCargando(false);
+    setErrorApi("");
+    try {
+      await olvidarContrasena(email);
       setEnviado(true);
       setCountdown(TIEMPO_REENVIO);
-    }, 1000);
+    } catch (err: any) {
+      const msg = err?.response?.data?.mensaje || "No se pudo enviar el correo. Intenta de nuevo.";
+      setErrorApi(msg);
+    } finally {
+      setCargando(false);
+    }
   }
 
-  function handleReenviar() {
+  async function handleReenviar() {
     if (countdown > 0) return;
-    // Simula reenvío
     setCargando(true);
-    setTimeout(() => {
-      setCargando(false);
+    setErrorApi("");
+    try {
+      await olvidarContrasena(email);
       setCountdown(TIEMPO_REENVIO);
-    }, 800);
+    } catch (err: any) {
+      const msg = err?.response?.data?.mensaje || "No se pudo reenviar. Intenta de nuevo.";
+      setErrorApi(msg);
+    } finally {
+      setCargando(false);
+    }
   }
 
   return (
@@ -88,6 +100,12 @@ export default function ForgotPasswordForm() {
             <BtnPrimary type="submit" loading={cargando}>
               {cargando ? "Enviando instrucciones…" : "Enviar instrucciones"}
             </BtnPrimary>
+
+            {errorApi && (
+              <p className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2.5">
+                {errorApi}
+              </p>
+            )}
           </form>
 
           {/* Enlace para volver al login */}

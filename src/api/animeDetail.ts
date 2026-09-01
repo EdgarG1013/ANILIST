@@ -19,6 +19,12 @@ export interface Episodio {
   fecha: string;
 }
 
+/** Plataforma de streaming o enlace externo */
+export interface LinkExterno {
+  nombre: string;
+  url: string;
+}
+
 /** Datos completos de un anime para la página de detalle.
  *  Incluye información extra de la API de Jikan (votos, ranking, popularidad,
  *  clasificación, duración, fuente, estado) que no estaban en sorai. */
@@ -49,6 +55,8 @@ export interface AnimeDetalle {
   episodios: Episodio[];
   relacionados: AnimeCard[];
   similares: AnimeCard[];
+  streaming: LinkExterno[];
+  externales: LinkExterno[];
 }
 
 // ─── Detalles hardcodeados (datos de ejemplo hasta que exista el backend) ───
@@ -115,6 +123,8 @@ export const DETALLE: Record<number, AnimeDetalle> = {
       { id: 2, title: "Shingeki no Kyojin", year: 2013, score: 9.1, type: "TV", img: imagenShingeki },
       { id: 5, title: "Steel Ball Run", year: 2026, score: 9.2, type: "ONA", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F4aa825c6b64fcc0c69cc7be0484dc3043f187b4c.jpg?generation=1786160569653404&alt=media" },
     ],
+    streaming: [],
+    externales: [],
   },
   2: {
     id: 2,
@@ -162,6 +172,8 @@ export const DETALLE: Record<number, AnimeDetalle> = {
       { id: 1, title: "Kimetsu no Yaiba", year: 2019, score: 8.4, type: "TV", img: imagenKimetsu },
       { id: 5, title: "Steel Ball Run", year: 2026, score: 9.2, type: "ONA", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F4aa825c6b64fcc0c69cc7be0484dc3043f187b4c.jpg?generation=1786160569653404&alt=media" },
     ],
+    streaming: [],
+    externales: [],
   },
 };
 
@@ -200,6 +212,8 @@ interface ApiAnime {
   themes?: ApiNamed[];
   demographics?: ApiNamed[];
   theme?: { openings?: string[]; endings?: string[] };
+  streaming?: { name?: string; url?: string }[];
+  external?: { name?: string; url?: string }[];
 }
 
 interface ApiCharacter {
@@ -249,6 +263,8 @@ function mapearDetalle(a: ApiAnime): AnimeDetalle {
     episodios: [],
     relacionados: [],
     similares: [],
+    streaming: (a.streaming || []).map(s => ({ nombre: s.name ?? "", url: s.url ?? "" })),
+    externales: (a.external || []).map(e => ({ nombre: e.name ?? "", url: e.url ?? "" })),
   };
 }
 

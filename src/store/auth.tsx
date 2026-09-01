@@ -1,52 +1,114 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-
-// ─── Estado global de autenticación (simulado) ──────────────────────────────
-// Mientras no exista backend, guarda la sesión en localStorage. El resto de la
-// app (navbar, panel) lee `usuario` para saber si hay alguien conectado.
-
-export interface Usuario {
-  nombre: string;
-  correo: string;
-  avatar: string;
-}
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  type ReactNode,
+} from 'react';
+import * as authService from '../api/authService';
+import type { UsuarioAuth } from '../api/authService';
 
 interface AuthCtx {
-  usuario: Usuario | null;
+  usuario: UsuarioAuth | null;
   autenticado: boolean;
-  iniciarSesion: (u: Usuario) => void;
-  cerrarSesion: () => void;
-  actualizarUsuario: (p: Partial<Usuario>) => void;
-}
+  cargando: boolean;
 
-const LLAVE = "anilist:auth:v1";
+  login: (correo: string, password: string) => Promise<void>;
+  register: (nombre: string, correo: string, password: string) => Promise<authService.AuthResponse>;
+  logout: () => Promise<void>;
+  cargarPerfil: () => Promise<void>;
+  actualizarUsuario: (p: Partial<UsuarioAuth>) => void;
+
+  // Aliases para compatibilidad con componentes existentes
+  iniciarSesion: (u: UsuarioAuth) => void;
+  cerrarSesion: () => void;
+}
 
 const Ctx = createContext<AuthCtx | null>(null);
 
-function leer(): Usuario | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(LLAVE);
-    if (!raw) return null;
-    return JSON.parse(raw) as Usuario;
-  } catch {
-    return null;
-  }
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [usuario, setUsuario] = useState<Usuario | null>(leer);
+  const [usuario, setUsuario] = useState<UsuarioAuth | null>(() =>
+    authService.obtenerUsuarioLocal(),
+  );
+  const [cargando, setCargando] = useState(true);
+
+  // Cargar perfil al montar si hay token
+  const cargarPerfil = useCallback(async () => {
+    try {
+      const res = await authService.obtenerPerfil();
+      const u: UsuarioAuth = {
+        id: res.data.id,
+        nombre: res.data.nombre,
+        correo: res.data.correo,
+        avatar: res.data.avatar,
+        preferencias: res.data.preferencias ?? null,
+      };
+      setUsuario(u);
+      localStorage.setItem('usuario', JSON.stringify(u));
+    } catch {
+      // Token inválido o expirado
+      setUsuario(null);
+      authService.limpiarSesion();
+    }
+  }, []);
 
   useEffect(() => {
-    if (usuario) localStorage.setItem(LLAVE, JSON.stringify(usuario));
-    else localStorage.removeItem(LLAVE);
-  }, [usuario]);
+    const token = authService.obtenerToken();
+    if (token) {
+      cargarPerfil().finally(() => setCargando(false));
+    } else {
+      setCargando(false);
+    }
+  }, [cargarPerfil]);
+
+  const login = async (correo: string, password: string) => {
+    const res = await authService.iniciarSesion(correo, password);
+    setUsuario(res.data.usuario);
+  };
+
+  const register = async (nombre: string, correo: string, password: string) => {
+    const res = await authService.registrar(nombre, correo, password);
+    setUsuario(res.data.usuario);
+    return res;
+  };
+
+  const logout = async () => {
+    try {
+      await authService.cerrarSesion();
+    } finally {
+      setUsuario(null);
+      authService.limpiarSesion();
+    }
+  };
+
+  const actualizarUsuario = (p: Partial<UsuarioAuth>) => {
+    setUsuario(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...p };
+      localStorage.setItem('usuario', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Aliases para compatibilidad
+  const iniciarSesionDirecto = (u: UsuarioAuth) => setUsuario(u);
+  const cerrarSesionDirecto = () => {
+    setUsuario(null);
+    authService.limpiarSesion();
+  };
 
   const valor: AuthCtx = {
     usuario,
     autenticado: usuario != null,
-    iniciarSesion: u => setUsuario(u),
-    cerrarSesion: () => setUsuario(null),
-    actualizarUsuario: p => setUsuario(prev => (prev ? { ...prev, ...p } : prev)),
+    cargando,
+    login,
+    register,
+    logout,
+    cargarPerfil,
+    actualizarUsuario,
+    iniciarSesion: iniciarSesionDirecto,
+    cerrarSesion: cerrarSesionDirecto,
   };
 
   return <Ctx.Provider value={valor}>{children}</Ctx.Provider>;
@@ -54,6 +116,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(Ctx);
-  if (!ctx) throw new Error("useAuth debe usarse dentro de <AuthProvider>");
+  if (!ctx) throw new Error('useAuth debe usarse dentro de <AuthProvider>');
   return ctx;
 }

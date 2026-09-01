@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { CatalogoItem, Medio } from "../api/jikanClient";
 
 // ─── Estado global de la biblioteca personal ─────────────────────────────────
@@ -76,6 +76,7 @@ interface BibliotecaCtx {
   actualizarGrupo: (id: string, cambios: Partial<Grupo>) => void;
   eliminarGrupo: (id: string) => void;
   setPerfil: (p: Partial<Perfil>) => void;
+  sincronizarConAuth: (u: { nombre: string; correo: string; avatar: string | null; preferencias: { sfw: boolean } | null }) => void;
   reemplazarTodo: (datos: { entradas?: Entrada[]; grupos?: Grupo[] }) => void;
   preferencias: Preferencias;
   setPreferencias: (p: Partial<Preferencias>) => void;
@@ -86,9 +87,9 @@ const LLAVE = "anilist:biblioteca:v1";
 const Ctx = createContext<BibliotecaCtx | null>(null);
 
 const PERFIL_INICIAL: Perfil = {
-  nombre: "Edgar Stiven",
+  nombre: "",
   avatar: "",
-  correo: "edgar@anilist.app",
+  correo: "",
 };
 
 const PREFERENCIAS_INICIALES: Preferencias = { sfw: true };
@@ -139,6 +140,11 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
   }, [entradas, grupos, perfil, preferencias]);
 
   const clave = (medio: Medio, id: number) => `${medio}:${id}`;
+
+  const sincronizarConAuth = useCallback((u: { nombre: string; correo: string; avatar: string | null; preferencias: { sfw: boolean } | null }) => {
+    setPerfilEstado({ nombre: u.nombre, correo: u.correo, avatar: u.avatar ?? "" });
+    if (u.preferencias) setPreferenciasEstado({ sfw: u.preferencias.sfw });
+  }, []);
 
   const valor: BibliotecaCtx = {
     entradas,
@@ -191,6 +197,7 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
       setGrupos(prev => prev.map(g => (g.id === id ? { ...g, ...cambios } : g))),
     eliminarGrupo: id => setGrupos(prev => prev.filter(g => g.id !== id)),
     setPerfil: p => setPerfilEstado(prev => ({ ...prev, ...p })),
+    sincronizarConAuth,
     preferencias,
     setPreferencias: p => setPreferenciasEstado(prev => ({ ...prev, ...p })),
     reemplazarTodo: datos => {

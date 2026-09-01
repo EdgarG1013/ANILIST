@@ -9,6 +9,11 @@ import MangaDetalladoHomePage from "./pages/landing/MangaDetalladoHomePage";
 import IniciarSesionPage from "./pages/autenticacion/IniciarSesionPage";
 import RegistroPage from "./pages/autenticacion/RegistroPage";
 import RecuperacionPasswordPage from "./pages/autenticacion/RecuperacionPasswordPage";
+import RestablecerPasswordPage from "./pages/autenticacion/RestablecerPasswordPage";
+import VerificarEmailPage from "./pages/autenticacion/VerificarEmailPage";
+import AuthCallbackPage from "./pages/autenticacion/AuthCallbackPage";
+// ─── Protección de rutas ────────────────────────────────────────────
+import ProtectedRoute from "./components/ProtectedRoute";
 // ─── Paginas del panel de usuario ─────────────────────────────────
 import AnimeDetalladoPage from "./pages/anime/AnimeDetalladoPage";
 import MangaDetalladoPage from "./pages/manga/MangaDetalladoPage";
@@ -41,22 +46,30 @@ export const router = createBrowserRouter([
   { path: "/iniciar-sesion", element: <IniciarSesionPage /> },
   { path: "/registro", element: <RegistroPage /> },
   { path: "/recuperar-password", element: <RecuperacionPasswordPage /> },
+  { path: "/restablecer-password", element: <RestablecerPasswordPage /> },
+  { path: "/verificar-email", element: <VerificarEmailPage /> },
+  { path: "/auth/callback", element: <AuthCallbackPage /> },
 
-  // paginas del panel de usuario
+  // paginas del panel de usuario (protegidas)
   {
-    path: "/panel",
-    element: <BibliotecaProvider><PanelLayout /></BibliotecaProvider>,
+    element: <ProtectedRoute />,
     children: [
-      { index: true, element: <InicioPage /> },
-      { path: "catalogo-anime", element: <CatalogoAnimePage /> },
-      { path: "catalogo-manga", element: <CatalogoMangaPage /> },
-      { path: "listas-anime", element: <ListasAnimePage /> },
-      { path: "listas-manga", element: <ListasMangaPage /> },
-      { path: "grupos", element: <GruposPage /> },
-      { path: "configuracion", element: <ConfiguracionPage /> },
-      { path: "anime/:id", element: <AnimeDetalladoPage /> },
-      { path: "manga/:id", element: <MangaDetalladoPage /> },
-      { path: "estado/:medio/:id", element: <EstadoPage /> },
+      {
+        path: "/panel",
+        element: <BibliotecaProvider><PanelLayout /></BibliotecaProvider>,
+        children: [
+          { index: true, element: <InicioPage /> },
+          { path: "catalogo-anime", element: <CatalogoAnimePage /> },
+          { path: "catalogo-manga", element: <CatalogoMangaPage /> },
+          { path: "listas-anime", element: <ListasAnimePage /> },
+          { path: "listas-manga", element: <ListasMangaPage /> },
+          { path: "grupos", element: <GruposPage /> },
+          { path: "configuracion", element: <ConfiguracionPage /> },
+          { path: "anime/:id", element: <AnimeDetalladoPage /> },
+          { path: "manga/:id", element: <MangaDetalladoPage /> },
+          { path: "estado/:medio/:id", element: <EstadoPage /> },
+        ],
+      },
     ],
   },
 

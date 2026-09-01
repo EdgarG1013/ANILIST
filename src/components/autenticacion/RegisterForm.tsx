@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { CheckCircle } from "lucide-react";
 import { Field, PasswordField, Checkbox, Divider, BtnPrimary } from "../ui/FormFields";
 import { useAuth } from "../../store/auth";
+import { getOAuthRedirectUrl } from "../../api/authService";
 
 // ─── Formulario de registro (lógica) ─────────────────────────────────────────
 
@@ -18,6 +20,8 @@ function validar(
     errores.usuario = "El nombre de usuario es obligatorio.";
   else if (usuario.length < 3)
     errores.usuario = "Debe tener al menos 3 caracteres.";
+  else if (!/^[a-zA-Z0-9]+$/.test(usuario))
+    errores.usuario = "Solo puede contener letras y números.";
 
   if (!email.trim())
     errores.email = "El email es obligatorio.";
@@ -62,7 +66,7 @@ const COLORES_SEGURIDAD: Record<number, string> = {
 
 export default function RegisterForm() {
   const navigate = useNavigate();
-  const { iniciarSesion } = useAuth();
+  const { register } = useAuth();
   const [usuario, setUsuario] = useState("");
   const [email, setEmail] = useState("");
   const [contrasena, setContrasena] = useState("");
@@ -70,22 +74,61 @@ export default function RegisterForm() {
   const [terminos, setTerminos] = useState(false);
   const [errores, setErrores] = useState<Record<string, string>>({});
   const [cargando, setCargando] = useState(false);
+  const [registrado, setRegistrado] = useState(false);
 
   const seguridad = calcularSeguridad(contrasena);
 
-  function handleSubmit(ev: React.FormEvent) {
+  async function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault();
     const e = validar(usuario, email, contrasena, confirmar, terminos);
     setErrores(e);
     if (Object.keys(e).length > 0) return;
 
-    // Simula la llamada a la API de registro
     setCargando(true);
-    setTimeout(() => {
+    try {
+      await register(usuario, email, contrasena);
+      setRegistrado(true);
+    } catch (err: any) {
+      const msg = err?.response?.data?.mensaje || "Error al crear la cuenta. Intenta de nuevo.";
+      setErrores({ general: msg });
+    } finally {
       setCargando(false);
-      iniciarSesion({ nombre: usuario, correo: email, avatar: "" });
-      navigate("/");
-    }, 900);
+    }
+  }
+
+  if (registrado) {
+    return (
+      <div className="flex flex-col items-center gap-9 text-center py-4">
+        <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+          <CheckCircle className="w-7 h-7 text-emerald-400" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-extrabold text-[#f0eefa] mb-2" style={{ fontFamily: "'Oxanium', sans-serif" }}>
+            ¡Revisa tu correo!
+          </h2>
+          <p className="text-sm text-[#8b82a8] max-w-xs mx-auto">
+            Enviamos un enlace de verificación a{" "}
+            <span className="text-[#946ed9] font-medium">{email}</span>.
+            Haz clic en el enlace para activar tu cuenta. Revisa también tu carpeta de spam.
+          </p>
+        </div>
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <button
+            onClick={() => navigate("/iniciar-sesion")}
+            className="h-11 px-6 rounded-xl text-white text-sm font-semibold transition-all hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)" }}
+          >
+            Ir a iniciar sesión
+          </button>
+          <Link
+            to="/"
+            className="text-sm text-[#8b82a8] hover:text-[#f0eefa] transition-colors"
+          >
+            Volver al inicio
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -100,6 +143,13 @@ export default function RegisterForm() {
         </h2>
         <p className="text-sm text-[#8b82a8] mt-1">Únete a la comunidad ANILIST</p>
       </div>
+
+      {/* Error general */}
+      {errores.general && (
+        <p className="text-red-400 text-sm text-center bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2.5">
+          {errores.general}
+        </p>
+      )}
 
       {/* Usuario y email en cuadrícula — se apila en móvil */}
       <div className="grid sm:grid-cols-2 gap-4">
@@ -202,6 +252,7 @@ export default function RegisterForm() {
         {/* Botón de Google */}
         <button
           type="button"
+          onClick={() => { window.location.href = getOAuthRedirectUrl('google'); }}
           className="flex items-center justify-center gap-2 h-11 rounded-xl border border-[#2a2140] bg-[#0d0b16] hover:border-[#946ed9]/40 hover:bg-[#130f22] transition-all text-sm text-[#c4bbd8] font-medium"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -216,6 +267,7 @@ export default function RegisterForm() {
         {/* Botón de Discord */}
         <button
           type="button"
+          onClick={() => { window.location.href = getOAuthRedirectUrl('discord'); }}
           className="flex items-center justify-center gap-2 h-11 rounded-xl border border-[#2a2140] bg-[#0d0b16] hover:border-[#946ed9]/40 hover:bg-[#130f22] transition-all text-sm text-[#c4bbd8] font-medium"
         >
           <svg className="h-5 w-5" viewBox="0 0 127.14 96.36">

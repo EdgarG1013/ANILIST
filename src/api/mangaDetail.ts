@@ -2,6 +2,7 @@
 // Reutiliza AnimeCard (definido en ./anime) para las secciones relacionadas.
 
 import type { AnimeCard } from "./anime";
+import type { Personaje } from "./animeDetail";
 import { pedirJikan } from "./jikanClient";
 
 /** Datos completos de un manga para su página de detalle. */
@@ -24,8 +25,10 @@ export interface MangaDetalle {
   sinopsis: string;
   img: string;
   autores: string[];
+  personajes: Personaje[];
   relacionados: AnimeCard[];
   similares: AnimeCard[];
+  externales: { nombre: string; url: string }[];
 }
 
 interface ApiNamed { mal_id: number; name: string; type?: string }
@@ -50,9 +53,16 @@ interface ApiManga {
   themes?: ApiNamed[];
   demographics?: ApiNamed[];
   authors?: { person?: { name?: string } }[];
+  external?: { name?: string; url?: string }[];
 }
 
 interface ApiRecommendation { entry?: { mal_id?: number; images?: { jpg?: { large_image_url?: string; image_url?: string } }; title?: string } }
+
+interface ApiCharacter {
+  character?: { mal_id?: number; name?: string; images?: { jpg?: { image_url?: string } } };
+  role?: string;
+  voice_actors?: { person?: { name?: string } }[];
+}
 
 function mapearManga(m: ApiManga): MangaDetalle {
   const img = m.images?.jpg?.large_image_url || m.images?.jpg?.image_url || "";
@@ -75,8 +85,10 @@ function mapearManga(m: ApiManga): MangaDetalle {
     sinopsis: m.synopsis ?? "Sin sinopsis disponible.",
     img,
     autores: (m.authors || []).map(a => a.person?.name ?? "").filter(Boolean),
+    personajes: [],
     relacionados: [],
     similares: [],
+    externales: (m.external || []).map(e => ({ nombre: e.name ?? "", url: e.url ?? "" })),
   };
 }
 
@@ -85,12 +97,20 @@ function mapearManga(m: ApiManga): MangaDetalle {
  * Consulta /manga/{id}/full y /manga/{id}/recommendations.
  */
 export async function obtenerMangaDetalleApi(id: number): Promise<MangaDetalle> {
-  const [{ data: base }, { data: recomendaciones }] = await Promise.all([
+  const [{ data: base }, { data: recomendaciones }, { data: personajes }] = await Promise.all([
     pedirJikan<{ data: ApiManga }>(`/manga/${id}/full`),
     pedirJikan<{ data: ApiRecommendation[] }>(`/manga/${id}/recommendations`),
+    pedirJikan<{ data: ApiCharacter[] }>(`/manga/${id}/characters`),
   ]);
 
   const detalle = mapearManga(base);
+
+  detalle.personajes = (personajes || []).slice(0, 12).map(c => ({
+    nombre: c.character?.name ?? "Personaje",
+    rol: c.role ?? "",
+    img: c.character?.images?.jpg?.image_url,
+    seiyuu: c.voice_actors?.[0]?.person?.name,
+  }));
 
   detalle.similares = (recomendaciones || []).slice(0, 8).map(r => ({
     id: r.entry?.mal_id ?? 0,

@@ -4,6 +4,8 @@ import { Star } from "lucide-react";
 import { obtenerMangaDetalleApi, type MangaDetalle } from "../../api/mangaDetail";
 import MangaHeroBanner from "../../components/anime/MangaHeroBanner";
 import AnimeSynopsis from "../../components/anime/AnimeSynopsis";
+import AnimeCharacters from "../../components/anime/AnimeCharacters";
+import AnimeOfficialSite from "../../components/anime/AnimeOfficialSite";
 import AnimeHorizontalCarousel from "../../components/anime/AnimeHorizontalCarousel";
 import DetalleSkeleton from "../../components/compartido/DetalleSkeleton";
 
@@ -70,6 +72,7 @@ export default function MangaDetalladoPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2 space-y-10">
             <AnimeSynopsis sinopsis={manga.sinopsis} />
+            <AnimeCharacters personajes={manga.personajes} />
 
             {manga.similares.length > 0 && (
               <AnimeHorizontalCarousel
@@ -98,6 +101,7 @@ export default function MangaDetalladoPage() {
                 {manga.autores[0] && <InfoFila label="Autor" value={manga.autores.join(", ")} />}
               </dl>
             </div>
+            <AnimeOfficialSite externales={manga.externales} />
           </div>
         </div>
       </main>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Newspaper, CalendarClock, Sparkles, BookOpen, ExternalLink } from "lucide-react";
 import { buscarCatalogo, obtenerNoticias, type CatalogoItem, type Medio, type Noticia } from "../../api/jikanClient";
 import { useBiblioteca } from "../../store/biblioteca";
+import { useAuth } from "../../store/auth";
 import { TipoBadge, PuntuacionBadge } from "../../components/landing/badges";
 
 // ─── Inicio del panel: noticias, próximos estrenos y recomendados ────────────
@@ -48,7 +49,8 @@ function Fila({
 }
 
 export default function InicioPage() {
-  const { perfil, entradas } = useBiblioteca();
+  const { entradas } = useBiblioteca();
+  const { usuario } = useAuth();
   const [proximos, setProximos] = useState<CatalogoItem[]>([]);
   const [animes, setAnimes] = useState<CatalogoItem[]>([]);
   const [mangas, setMangas] = useState<CatalogoItem[]>([]);
@@ -97,7 +99,7 @@ export default function InicioPage() {
   return (
     <div>
       <h1 className="text-2xl font-semibold tracking-wider mb-1" style={{ fontFamily: "'Oxanium', sans-serif" }}>
-        Hola, {perfil.nombre}
+        Hola, {usuario?.nombre ?? "Usuario"}
       </h1>
       <p className="text-sm text-[#8b82a8] mb-6">Este es el resumen de tu biblioteca y lo que viene en la industria.</p>
 

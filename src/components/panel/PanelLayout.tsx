@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   Bell, LogOut, Menu, X, LayoutDashboard, Clapperboard, BookOpen,
-  ListVideo, ListChecks, FolderKanban, Settings, User,
+  ListVideo, ListChecks, FolderKanban, Settings,
 } from "lucide-react";
 import logo from "../../assets/logo.svg";
 import { useBiblioteca } from "../../store/biblioteca";
@@ -29,8 +29,7 @@ const NOTIFICACIONES = [
 // ─── Barra superior del panel ────────────────────────────────────────────────
 
 function PanelNavbar({ onToggleMenu }: { onToggleMenu: () => void }) {
-  const { perfil } = useBiblioteca();
-  const { cerrarSesion } = useAuth();
+  const { usuario, cerrarSesion } = useAuth();
   const [abierto, setAbierto] = useState(false);
   const navigate = useNavigate();
 
@@ -79,13 +78,13 @@ function PanelNavbar({ onToggleMenu }: { onToggleMenu: () => void }) {
 
       {/* Usuario */}
       <div className="flex items-center gap-2 pl-1 sm:pl-3 sm:border-l border-[#2a2140]">
-        <span className="w-9 h-9 rounded-full bg-[#1c1928] border border-[#2a2140] overflow-hidden flex items-center justify-center">
-          {perfil.avatar
-            ? <img src={perfil.avatar} alt="" className="w-full h-full object-cover" />
-            : <User className="w-4 h-4 text-[#8b82a8]" />}
+        <span className="w-9 h-9 rounded-full bg-[#1c1928] border border-[#2a2140] overflow-hidden flex items-center justify-center shrink-0">
+          {usuario?.avatar
+            ? <img src={usuario.avatar} alt="" className="w-full h-full object-cover" />
+            : <span className="text-xs font-bold text-[#946ed9]">{(usuario?.nombre ?? "?")[0].toUpperCase()}</span>}
         </span>
         <span className="hidden sm:block text-sm font-semibold" style={{ fontFamily: "'Oxanium', sans-serif" }}>
-          {perfil.nombre}
+          {usuario?.nombre ?? ""}
         </span>
       </div>
 
@@ -160,6 +159,14 @@ function PanelSidebar({ abierto, cerrar }: { abierto: boolean; cerrar: () => voi
 
 export default function PanelLayout() {
   const [menu, setMenu] = useState(false);
+  const { usuario } = useAuth();
+  const { sincronizarConAuth } = useBiblioteca();
+
+  useEffect(() => {
+    if (usuario) {
+      sincronizarConAuth(usuario);
+    }
+  }, [usuario, sincronizarConAuth]);
 
   return (
       <div
