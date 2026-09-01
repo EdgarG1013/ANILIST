@@ -323,14 +323,28 @@ export async function obtenerDetalleApi(id: number): Promise<AnimeDetalle> {
     );
     detalle.relacionados = detalle.relacionados.filter(r => r.img);
 
-    detalle.similares = (recomendaciones || []).slice(0, 8).map(r => ({
-      id: r.entry?.mal_id ?? 0,
-      title: r.entry?.title ?? "",
-      year: 0,
-      score: 0,
-      type: "TV",
-      img: r.entry?.images?.jpg?.large_image_url || r.entry?.images?.jpg?.image_url || "",
-    }));
+    detalle.similares = await Promise.all(
+      (recomendaciones || [])
+        .map(r => r.entry?.mal_id)
+        .filter((v): v is number => v != null && v > 0)
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .slice(0, 8)
+        .map(async id => {
+          try {
+            const { data: rec } = await pedirJikan<{ data: ApiAnime }>(`/anime/${id}`);
+            return {
+              id,
+              title: rec.title || "Sin título",
+              year: rec.year ?? rec.aired?.prop?.from?.year ?? 0,
+              score: rec.score ?? 0,
+              type: rec.type || "TV",
+              img: rec.images?.jpg?.large_image_url || rec.images?.jpg?.image_url || "",
+            };
+          } catch {
+            return { id, title: "", year: 0, score: 0, type: "TV", img: "" };
+          }
+        }),
+    );
 
     return detalle;
   } catch {
