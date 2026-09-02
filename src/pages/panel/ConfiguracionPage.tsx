@@ -39,15 +39,37 @@ export default function ConfiguracionPage() {
     const texto = await file.text();
     try {
       if (file.name.endsWith(".json")) {
-        const datos = JSON.parse(texto) as { entradas?: Entrada[]; grupos?: Grupo[] };
-        reemplazarTodo({ entradas: datos.entradas, grupos: datos.grupos });
-        setMensaje(`Se importaron ${datos.entradas?.length ?? 0} títulos desde JSON.`);
+        const datos = JSON.parse(texto) as { entradas?: Record<string, unknown>[]; grupos?: Grupo[] };
+        // Migrar entradas importadas para incluir campos nuevos
+        const entradasMigradas: Entrada[] = (datos.entradas ?? []).map(e => ({
+          listaId: (e.listaId as string) ?? null,
+          id: (e.id as number) ?? 0,
+          medio: (e.medio as Entrada["medio"]) ?? "anime",
+          titulo: (e.titulo as string) ?? "",
+          img: (e.img as string) ?? "",
+          tipo: (e.tipo as string) ?? "",
+          estado: (e.estado as Entrada["estado"]) ?? "por-ver",
+          progreso: (e.progreso as number) ?? 0,
+          total: (e.total as number) ?? null,
+          favorito: (e.favorito as boolean) ?? false,
+          puntuacion: (e.puntuacion as number) ?? 0,
+          notas: (e.notas as string) ?? "",
+          fechaInicio: (e.fechaInicio as string) ?? "",
+          fechaFin: (e.fechaFin as string) ?? "",
+          agregado: (e.agregado as string) ?? new Date().toISOString(),
+          orden: (e.orden as number) ?? 0,
+          etiquetas: (e.etiquetas as string[]) ?? [],
+          urlRespaldo: (e.urlRespaldo as string) ?? null,
+        }));
+        reemplazarTodo({ entradas: entradasMigradas, grupos: datos.grupos });
+        setMensaje(`Se importaron ${entradasMigradas.length} títulos desde JSON.`);
       } else {
         // TXT: una entrada por línea con formato "[medio] Título — estado"
         const nuevas: Entrada[] = texto.split("\n").flatMap((linea, i) => {
           const m = linea.match(/^\[(anime|manga)\]\s*(.+?)\s*—\s*([\w-]+)/i);
           if (!m) return [];
           return [{
+            listaId: null,
             id: Date.now() + i,
             medio: m[1].toLowerCase() as Entrada["medio"],
             titulo: m[2].trim(),
@@ -64,6 +86,7 @@ export default function ConfiguracionPage() {
             agregado: new Date().toISOString(),
             orden: i,
             etiquetas: [],
+            urlRespaldo: null,
           }];
         });
         reemplazarTodo({ entradas: nuevas });

@@ -160,13 +160,14 @@ function PanelSidebar({ abierto, cerrar }: { abierto: boolean; cerrar: () => voi
 export default function PanelLayout() {
   const [menu, setMenu] = useState(false);
   const { usuario } = useAuth();
-  const { sincronizarConAuth } = useBiblioteca();
+  const { sincronizarConAuth, sincronizarConBackend } = useBiblioteca();
 
   useEffect(() => {
     if (usuario) {
       sincronizarConAuth(usuario);
+      sincronizarConBackend();
     }
-  }, [usuario, sincronizarConAuth]);
+  }, [usuario, sincronizarConAuth, sincronizarConBackend]);
 
   return (
       <div
