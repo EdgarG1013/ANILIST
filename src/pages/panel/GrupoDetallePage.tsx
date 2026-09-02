@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft, Plus, Trash2, GripVertical, X, Search, Loader2, Library, Globe, ImageIcon, Pencil, Check,
@@ -33,7 +33,8 @@ interface ItemVista {
 
 export default function GrupoDetallePage() {
   const { id } = useParams();
-  const { grupos, entradas, clave, actualizarGrupo } = useBiblioteca();
+  const { grupos, entradas, clave, actualizarGrupo, subirPortadaGrupo } = useBiblioteca();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const grupo = grupos.find(g => g.id === id);
 
   const [listaActiva, setListaActiva] = useState<string | null>(null);
@@ -147,15 +148,27 @@ export default function GrupoDetallePage() {
       <header className="bg-[#110f1a] border border-[#2a2140] rounded-2xl overflow-hidden mb-5">
         <div className="flex flex-col sm:flex-row">
           <div className="sm:w-56 shrink-0 aspect-[16/9] sm:aspect-auto sm:min-h-[150px] bg-[#16141e] flex items-center justify-center">
-            {grupo.portada
-              ? <img src={grupo.portada} alt="" className="w-full h-full object-cover" />
+            {grupo.portadaUrl
+              ? <img src={grupo.portadaUrl} alt="" className="w-full h-full object-cover" />
               : <ImageIcon className="w-8 h-8 text-[#2a2140]" aria-hidden="true" />}
           </div>
           <div className="flex-1 min-w-0 p-4">
             {editando ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 <input value={grupo.titulo} onChange={e => actualizarGrupo(grupo.id, { titulo: e.target.value })} aria-label="Título del grupo" className={campo} />
-                <input value={grupo.portada} onChange={e => actualizarGrupo(grupo.id, { portada: e.target.value })} placeholder="Portada (URL)" aria-label="Portada del grupo" className={campo} />
+                <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={async e => {
+                  const archivo = e.target.files?.[0];
+                  if (archivo && grupo) {
+                    await subirPortadaGrupo(grupo.id, archivo);
+                  }
+                }} />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className={campo + " text-left cursor-pointer"}
+                >
+                  {grupo.portadaUrl ? "Cambiar portada…" : "Subir portada…"}
+                </button>
                 <input value={grupo.descripcion} onChange={e => actualizarGrupo(grupo.id, { descripcion: e.target.value })} placeholder="Descripción" aria-label="Descripción del grupo" className={campo} />
                 <input
                   value={grupo.etiquetas.join(", ")}

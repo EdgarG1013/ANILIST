@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
-import { Upload, Download, User, KeyRound, FileJson, FileText, ShieldAlert } from "lucide-react";
+import { Upload, Download, User, KeyRound, FileJson, FileText, ShieldAlert, Camera } from "lucide-react";
 import { useBiblioteca, type Entrada, type Grupo } from "../../store/biblioteca";
+import api from "../../api/axios";
 
 // ─── Configuración de cuenta, importación y exportación ──────────────────────
 
@@ -9,7 +10,9 @@ export default function ConfiguracionPage() {
   const [nombre, setNombre] = useState(perfil.nombre);
   const [correo, setCorreo] = useState(perfil.correo);
   const [mensaje, setMensaje] = useState<string | null>(null);
+  const [subiendoAvatar, setSubiendoAvatar] = useState(false);
   const archivoRef = useRef<HTMLInputElement>(null);
+  const avatarRef = useRef<HTMLInputElement>(null);
 
   function descargar(contenido: string, nombreArchivo: string, tipo: string) {
     const url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
@@ -109,26 +112,46 @@ export default function ConfiguracionPage() {
           <User className="w-4 h-4 text-[#946ed9]" /> Perfil
         </h2>
         <div className="flex items-center gap-4 mb-4">
-          <span className="w-16 h-16 rounded-full overflow-hidden bg-[#1c1928] border border-[#2a2140] flex items-center justify-center">
+          <span className="w-16 h-16 rounded-full overflow-hidden bg-[#1c1928] border border-[#2a2140] flex items-center justify-center shrink-0">
             {perfil.avatar
               ? <img src={perfil.avatar} alt="Foto de perfil actual" className="w-full h-full object-cover" />
               : <User className="w-6 h-6 text-[#8b82a8]" />}
           </span>
           <div>
-            <label htmlFor="avatar" className="block text-xs text-[#8b82a8] mb-1">Foto de perfil</label>
+            <label className="block text-xs text-[#8b82a8] mb-1">Foto de perfil</label>
             <input
-              id="avatar"
+              ref={avatarRef}
               type="file"
               accept="image/*"
-              onChange={e => {
+              className="hidden"
+              onChange={async (e) => {
                 const f = e.target.files?.[0];
                 if (!f) return;
-                const lector = new FileReader();
-                lector.onload = () => setPerfil({ avatar: String(lector.result) });
-                lector.readAsDataURL(f);
+                setSubiendoAvatar(true);
+                try {
+                  const formData = new FormData();
+                  formData.append("archivo", f);
+                  const res = await api.patch<{ ok: boolean; avatar: string }>("/auth/avatar", formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                  });
+                  setPerfil({ avatar: res.data.avatar });
+                  setMensaje("Foto de perfil actualizada.");
+                } catch {
+                  setMensaje("Error al subir la foto de perfil.");
+                }
+                setSubiendoAvatar(false);
+                if (avatarRef.current) avatarRef.current.value = "";
               }}
-              className="text-sm text-[#8b82a8] file:mr-3 file:h-9 file:px-3 file:rounded-xl file:border-0 file:bg-[#946ed9] file:text-white file:text-sm"
             />
+            <button
+              type="button"
+              onClick={() => avatarRef.current?.click()}
+              disabled={subiendoAvatar}
+              className="h-9 px-3 rounded-xl text-xs font-semibold border border-[#2a2140] text-[#f0eefa] hover:border-[#946ed9]/60 flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              {subiendoAvatar ? "Subiendo…" : "Cambiar foto"}
+            </button>
           </div>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">

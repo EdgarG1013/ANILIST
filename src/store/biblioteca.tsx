@@ -9,6 +9,13 @@ import {
   type CrearListaPayload,
   type ActualizarListaPayload,
 } from "../api/listaService";
+import {
+  obtenerGrupos,
+  crearGrupo as crearGrupoApi,
+  actualizarGrupo as actualizarGrupoApi,
+  eliminarGrupo as eliminarGrupoApi,
+  type GrupoEntrada,
+} from "../api/grupoService";
 
 // ─── Estado global de la biblioteca personal ─────────────────────────────────
 // Backend como fuente de verdad, localStorage como caché offline.
@@ -61,11 +68,11 @@ export interface Grupo {
   id: string;
   titulo: string;
   descripcion: string;
-  portada: string;
+  portadaUrl: string | null;
   etiquetas: string[];
   listas: ListaPersonalizada[];
   externos: ItemExterno[];
-  creado: string;
+  creadoEn: string;
 }
 
 export interface Perfil {
@@ -88,9 +95,17 @@ interface BibliotecaCtx {
   quitar: (medio: Medio, id: number) => Promise<void>;
   actualizar: (medio: Medio, id: number, cambios: Partial<Entrada>) => Promise<void>;
   reordenar: (medio: Medio, estado: Estado | "todos", clavesOrdenadas: string[]) => void;
-  crearGrupo: (g: Omit<Grupo, "id" | "creado" | "listas" | "externos">) => void;
-  actualizarGrupo: (id: string, cambios: Partial<Grupo>) => void;
-  eliminarGrupo: (id: string) => void;
+  crearGrupo: (g: Omit<Grupo, "id" | "creadoEn" | "listas" | "externos">) => Promise<void>;
+  actualizarGrupo: (id: string, cambios: Partial<Grupo>) => Promise<void>;
+  eliminarGrupo: (id: string) => Promise<void>;
+  subirPortadaGrupo: (id: string, archivo: File) => Promise<string | null>;
+  crearListaGrupo: (grupoId: string, nombre: string) => Promise<void>;
+  actualizarListaGrupo: (listaId: string, data: { nombre?: string; orden?: number }) => Promise<void>;
+  eliminarListaGrupo: (listaId: string) => Promise<void>;
+  agregarItemGrupo: (listaId: string, medio: Medio, tenraiId: string, externo?: ItemExterno) => Promise<void>;
+  eliminarItemGrupo: (listaId: string, medio: Medio, tenraiId: string) => Promise<void>;
+  agregarExternoGrupo: (grupoId: string, externo: ItemExterno) => Promise<void>;
+  eliminarExternoGrupo: (grupoId: string, clave: string) => Promise<void>;
   setPerfil: (p: Partial<Perfil>) => void;
   sincronizarConAuth: (u: { nombre: string; correo: string; avatar: string | null; preferencias: { sfw: boolean } | null }) => void;
   sincronizarConBackend: () => Promise<void>;
@@ -138,7 +153,12 @@ function leer(): Guardado {
     }) as Entrada[];
     return {
       entradas,
-      grupos: (p.grupos ?? []).map(g => ({ ...g, portada: g.portada ?? "", externos: g.externos ?? [] })),
+      grupos: (p.grupos ?? []).map(g => ({
+        ...g,
+        portadaUrl: g.portadaUrl ?? null,
+        externos: g.externos ?? [],
+        creadoEn: g.creadoEn ?? new Date().toISOString(),
+      })),
       perfil: { ...PERFIL_INICIAL, ...(p.perfil ?? {}) },
       preferencias: { ...PREFERENCIAS_INICIALES, ...(p.preferencias ?? {}) },
     };
@@ -180,6 +200,32 @@ function deBackendAEntrada(l: ListaEntrada): Entrada {
   };
 }
 
+/** Convierte un grupo del backend al formato local */
+function deBackendAGrupo(g: GrupoEntrada): Grupo {
+  return {
+    id: g.id,
+    titulo: g.titulo,
+    descripcion: g.descripcion,
+    portadaUrl: g.portadaUrl,
+    etiquetas: g.etiquetas,
+    listas: g.listas.map(l => ({
+      id: l.id,
+      nombre: l.nombre,
+      orden: l.orden,
+      items: l.items.map(i => i.clave),
+    })),
+    externos: g.externos.map(x => ({
+      clave: x.clave,
+      id: Number(x.tenraiId),
+      medio: x.medio as Medio,
+      titulo: x.titulo,
+      img: x.img,
+      tipo: x.tipo,
+    })),
+    creadoEn: g.creadoEn,
+  };
+}
+
 export function BibliotecaProvider({ children }: { children: ReactNode }) {
   const inicial = useMemo(leer, []);
   const [entradas, setEntradas] = useState<Entrada[]>(inicial.entradas);
@@ -202,9 +248,13 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
   /** Cargar todas las listas del backend y reemplazar el estado local */
   const sincronizarConBackend = useCallback(async () => {
     try {
-      const listas = await obtenerListas();
+      const [listas, gruposBackend] = await Promise.all([
+        obtenerListas(),
+        obtenerGrupos(),
+      ]);
       const entradasBackend = listas.map(deBackendAEntrada);
       setEntradas(entradasBackend);
+      setGrupos(gruposBackend.map(deBackendAGrupo));
     } catch {
       // Si el backend no responde, mantener datos de localStorage
       console.warn("No se pudo sincronizar con el backend, usando caché local");
@@ -331,20 +381,171 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const crearGrupo = useCallback((g: Omit<Grupo, "id" | "creado" | "listas" | "externos">) => {
-    setGrupos(prev => [
-      ...prev,
-      { ...g, id: crypto.randomUUID(), creado: new Date().toISOString(), listas: [], externos: [] },
-    ]);
+  const crearGrupo = useCallback(async (g: Omit<Grupo, "id" | "creadoEn" | "listas" | "externos">) => {
+    try {
+      const nuevo = await crearGrupoApi({
+        titulo: g.titulo,
+        descripcion: g.descripcion,
+        etiquetas: g.etiquetas,
+      });
+      setGrupos(prev => [...prev, deBackendAGrupo(nuevo)]);
+    } catch (err) {
+      console.error("Error creando grupo:", err);
+    }
   }, []);
 
-  const actualizarGrupo = useCallback((id: string, cambios: Partial<Grupo>) => {
+  const actualizarGrupo = useCallback(async (id: string, cambios: Partial<Grupo>) => {
+    // Optimistic update
     setGrupos(prev => prev.map(g => (g.id === id ? { ...g, ...cambios } : g)));
+
+    try {
+      await actualizarGrupoApi(id, {
+        titulo: cambios.titulo,
+        descripcion: cambios.descripcion,
+        etiquetas: cambios.etiquetas,
+      });
+    } catch (err) {
+      console.error("Error actualizando grupo:", err);
+      sincronizarConBackend();
+    }
+  }, [sincronizarConBackend]);
+
+  const eliminarGrupo = useCallback(async (id: string) => {
+    setGrupos(prev => prev.filter(g => g.id !== id));
+    try {
+      await eliminarGrupoApi(id);
+    } catch (err) {
+      console.error("Error eliminando grupo:", err);
+      sincronizarConBackend();
+    }
+  }, [sincronizarConBackend]);
+
+  const subirPortadaGrupo = useCallback(async (id: string, archivo: File): Promise<string | null> => {
+    try {
+      const { subirPortada } = await import("../api/grupoService");
+      const resultado = await subirPortada(id, archivo);
+      setGrupos(prev => prev.map(g => (g.id === id ? { ...g, portadaUrl: resultado.portadaUrl } : g)));
+      return resultado.portadaUrl;
+    } catch (err) {
+      console.error("Error subiendo portada:", err);
+      return null;
+    }
   }, []);
 
-  const eliminarGrupo = useCallback((id: string) => {
-    setGrupos(prev => prev.filter(g => g.id !== id));
+  const crearListaGrupo = useCallback(async (grupoId: string, nombre: string) => {
+    try {
+      const { crearListaGrupo: crearListaApi } = await import("../api/grupoService");
+      const nueva = await crearListaApi(grupoId, { nombre });
+      setGrupos(prev => prev.map(g => {
+        if (g.id !== grupoId) return g;
+        return {
+          ...g,
+          listas: [...g.listas, { id: nueva.id, nombre: nueva.nombre, orden: nueva.orden, items: [] }],
+        };
+      }));
+    } catch (err) {
+      console.error("Error creando lista:", err);
+    }
   }, []);
+
+  const actualizarListaGrupo = useCallback(async (listaId: string, data: { nombre?: string; orden?: number }) => {
+    setGrupos(prev => prev.map(g => ({
+      ...g,
+      listas: g.listas.map(l => (l.id === listaId ? { ...l, ...data } : l)),
+    })));
+    try {
+      const { actualizarListaGrupo: actualizarListaApi } = await import("../api/grupoService");
+      await actualizarListaApi(listaId, data);
+    } catch (err) {
+      console.error("Error actualizando lista:", err);
+      sincronizarConBackend();
+    }
+  }, [sincronizarConBackend]);
+
+  const eliminarListaGrupo = useCallback(async (listaId: string) => {
+    setGrupos(prev => prev.map(g => ({
+      ...g,
+      listas: g.listas.filter(l => l.id !== listaId),
+    })));
+    try {
+      const { eliminarListaGrupo: eliminarListaApi } = await import("../api/grupoService");
+      await eliminarListaApi(listaId);
+    } catch (err) {
+      console.error("Error eliminando lista:", err);
+      sincronizarConBackend();
+    }
+  }, [sincronizarConBackend]);
+
+  const agregarItemGrupo = useCallback(async (listaId: string, medio: Medio, tenraiId: string, externo?: ItemExterno) => {
+    const clave = `${medio}:${tenraiId}`;
+    // Optimistic update
+    setGrupos(prev => prev.map(g => ({
+      ...g,
+      listas: g.listas.map(l => (l.id === listaId ? { ...l, items: [...l.items, clave] } : l)),
+      externos: externo ? [...g.externos, externo] : g.externos,
+    })));
+    try {
+      const { agregarItemGrupo: agregarItemApi, agregarExternoGrupo: agregarExternoApi } = await import("../api/grupoService");
+      if (externo) {
+        // Buscar el grupoId de la lista
+        const grupo = grupos.find(g => g.listas.some(l => l.id === listaId));
+        if (grupo) await agregarExternoApi(grupo.id, externo as any);
+      }
+      await agregarItemApi(listaId, { medio, tenraiId });
+    } catch (err) {
+      console.error("Error agregando item:", err);
+      sincronizarConBackend();
+    }
+  }, [grupos, sincronizarConBackend]);
+
+  const eliminarItemGrupo = useCallback(async (listaId: string, medio: Medio, tenraiId: string) => {
+    const clave = `${medio}:${tenraiId}`;
+    setGrupos(prev => prev.map(g => ({
+      ...g,
+      listas: g.listas.map(l => (l.id === listaId ? { ...l, items: l.items.filter(i => i !== clave) } : l)),
+    })));
+    try {
+      const { eliminarItemGrupo: eliminarItemApi } = await import("../api/grupoService");
+      await eliminarItemApi(listaId, medio, tenraiId);
+    } catch (err) {
+      console.error("Error eliminando item:", err);
+      sincronizarConBackend();
+    }
+  }, [sincronizarConBackend]);
+
+  const agregarExternoGrupo = useCallback(async (grupoId: string, externo: ItemExterno) => {
+    setGrupos(prev => prev.map(g => {
+      if (g.id !== grupoId) return g;
+      return { ...g, externos: [...g.externos, externo] };
+    }));
+    try {
+      const { agregarExternoGrupo: agregarExternoApi } = await import("../api/grupoService");
+      await agregarExternoApi(grupoId, {
+        medio: externo.medio,
+        tenraiId: String(externo.id),
+        titulo: externo.titulo,
+        img: externo.img,
+        tipo: externo.tipo,
+      });
+    } catch (err) {
+      console.error("Error agregando externo:", err);
+      sincronizarConBackend();
+    }
+  }, [sincronizarConBackend]);
+
+  const eliminarExternoGrupo = useCallback(async (grupoId: string, clave: string) => {
+    setGrupos(prev => prev.map(g => {
+      if (g.id !== grupoId) return g;
+      return { ...g, externos: g.externos.filter(e => e.clave !== clave) };
+    }));
+    try {
+      const { eliminarExternoGrupo: eliminarExternoApi } = await import("../api/grupoService");
+      await eliminarExternoApi(grupoId, clave);
+    } catch (err) {
+      console.error("Error eliminando externo:", err);
+      sincronizarConBackend();
+    }
+  }, [sincronizarConBackend]);
 
   const setPerfil = useCallback((p: Partial<Perfil>) => {
     setPerfilEstado(prev => ({ ...prev, ...p }));
@@ -372,6 +573,14 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
     crearGrupo,
     actualizarGrupo,
     eliminarGrupo,
+    subirPortadaGrupo,
+    crearListaGrupo,
+    actualizarListaGrupo,
+    eliminarListaGrupo,
+    agregarItemGrupo,
+    eliminarItemGrupo,
+    agregarExternoGrupo,
+    eliminarExternoGrupo,
     setPerfil,
     sincronizarConAuth,
     sincronizarConBackend,
@@ -381,6 +590,8 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
   }), [
     entradas, grupos, perfil, clave, agregar, quitar, actualizar,
     reordenar, crearGrupo, actualizarGrupo, eliminarGrupo,
+    subirPortadaGrupo, crearListaGrupo, actualizarListaGrupo, eliminarListaGrupo,
+    agregarItemGrupo, eliminarItemGrupo, agregarExternoGrupo, eliminarExternoGrupo,
     setPerfil, sincronizarConAuth, sincronizarConBackend,
     preferencias, setPreferencias, reemplazarTodo,
   ]);
