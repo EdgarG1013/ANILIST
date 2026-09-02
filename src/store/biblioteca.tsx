@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { CatalogoItem, Medio } from "../api/jikanClient";
 import {
   obtenerListas,
@@ -25,9 +25,7 @@ export type EstadoManga = "leyendo" | "por-leer" | "completado" | "pausado" | "d
 export type Estado = EstadoAnime | EstadoManga;
 
 export interface Entrada {
-  /** UUID de la tabla listas en el backend (null si es local-only) */
   listaId: string | null;
-  /** ID de Jikan/Tenrai (mal_id) */
   id: number;
   medio: Medio;
   titulo: string;
@@ -44,24 +42,25 @@ export interface Entrada {
   agregado: string;
   orden: number;
   etiquetas: string[];
-  /** URL de respaldo en Supabase Storage */
   urlRespaldo: string | null;
+}
+
+export interface ItemListaGrupo {
+  clave: string;
+  medio: Medio;
+  tenraiId: string;
+  titulo: string;
+  img: string;
+  tipo: string;
+  datosCatalogo: Record<string, unknown>;
+  esExterno: boolean;
 }
 
 export interface ListaPersonalizada {
   id: string;
   nombre: string;
-  items: string[];
+  items: ItemListaGrupo[];
   orden: number;
-}
-
-export interface ItemExterno {
-  clave: string;
-  id: number;
-  medio: Medio;
-  titulo: string;
-  img: string;
-  tipo: string;
 }
 
 export interface Grupo {
@@ -71,7 +70,6 @@ export interface Grupo {
   portadaUrl: string | null;
   etiquetas: string[];
   listas: ListaPersonalizada[];
-  externos: ItemExterno[];
   creadoEn: string;
 }
 
@@ -95,17 +93,16 @@ interface BibliotecaCtx {
   quitar: (medio: Medio, id: number) => Promise<void>;
   actualizar: (medio: Medio, id: number, cambios: Partial<Entrada>) => Promise<void>;
   reordenar: (medio: Medio, estado: Estado | "todos", clavesOrdenadas: string[]) => void;
-  crearGrupo: (g: Omit<Grupo, "id" | "creadoEn" | "listas" | "externos">) => Promise<void>;
+  crearGrupo: (g: Omit<Grupo, "id" | "creadoEn" | "listas">) => Promise<void>;
   actualizarGrupo: (id: string, cambios: Partial<Grupo>) => Promise<void>;
   eliminarGrupo: (id: string) => Promise<void>;
   subirPortadaGrupo: (id: string, archivo: File) => Promise<string | null>;
-  crearListaGrupo: (grupoId: string, nombre: string) => Promise<void>;
+  crearListaGrupo: (grupoId: string, nombre: string) => Promise<string | null>;
   actualizarListaGrupo: (listaId: string, data: { nombre?: string; orden?: number }) => Promise<void>;
   eliminarListaGrupo: (listaId: string) => Promise<void>;
-  agregarItemGrupo: (listaId: string, medio: Medio, tenraiId: string, externo?: ItemExterno) => Promise<void>;
+  agregarItemGrupo: (listaId: string, medio: Medio, tenraiId: string, datosCatalogo?: Record<string, unknown>) => Promise<void>;
   eliminarItemGrupo: (listaId: string, medio: Medio, tenraiId: string) => Promise<void>;
-  agregarExternoGrupo: (grupoId: string, externo: ItemExterno) => Promise<void>;
-  eliminarExternoGrupo: (grupoId: string, clave: string) => Promise<void>;
+  reordenarItemsGrupo: (listaId: string, items: { medio: Medio; tenraiId: string }[]) => Promise<void>;
   setPerfil: (p: Partial<Perfil>) => void;
   sincronizarConAuth: (u: { nombre: string; correo: string; avatar: string | null; preferencias: { sfw: boolean } | null }) => void;
   sincronizarConBackend: () => Promise<void>;
@@ -156,7 +153,12 @@ function leer(): Guardado {
       grupos: (p.grupos ?? []).map(g => ({
         ...g,
         portadaUrl: g.portadaUrl ?? null,
-        externos: g.externos ?? [],
+        listas: (g.listas ?? []).map(l => ({
+          ...l,
+          items: Array.isArray(l.items) && l.items.length > 0 && typeof l.items[0] === "string"
+            ? (l.items as unknown as string[]).map(k => ({ clave: k, medio: k.split(":")[0] as Medio, tenraiId: k.split(":")[1], titulo: "", img: "", tipo: "", datosCatalogo: {}, esExterno: false }))
+            : (l.items ?? []),
+        })),
         creadoEn: g.creadoEn ?? new Date().toISOString(),
       })),
       perfil: { ...PERFIL_INICIAL, ...(p.perfil ?? {}) },
@@ -212,15 +214,16 @@ function deBackendAGrupo(g: GrupoEntrada): Grupo {
       id: l.id,
       nombre: l.nombre,
       orden: l.orden,
-      items: l.items.map(i => i.clave),
-    })),
-    externos: g.externos.map(x => ({
-      clave: x.clave,
-      id: Number(x.tenraiId),
-      medio: x.medio as Medio,
-      titulo: x.titulo,
-      img: x.img,
-      tipo: x.tipo,
+      items: l.items.map(i => ({
+        clave: i.clave,
+        medio: i.medio as Medio,
+        tenraiId: i.tenraiId,
+        titulo: i.titulo,
+        img: i.img,
+        tipo: i.tipo,
+        datosCatalogo: i.datosCatalogo,
+        esExterno: i.esExterno,
+      })),
     })),
     creadoEn: g.creadoEn,
   };
@@ -232,6 +235,9 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
   const [grupos, setGrupos] = useState<Grupo[]>(inicial.grupos);
   const [perfil, setPerfilEstado] = useState<Perfil>(inicial.perfil);
   const [preferencias, setPreferenciasEstado] = useState<Preferencias>(inicial.preferencias);
+
+  const gruposRef = useRef(grupos);
+  gruposRef.current = grupos;
 
   // Persistir a localStorage como caché offline
   useEffect(() => {
@@ -256,7 +262,6 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
       setEntradas(entradasBackend);
       setGrupos(gruposBackend.map(deBackendAGrupo));
     } catch {
-      // Si el backend no responde, mantener datos de localStorage
       console.warn("No se pudo sincronizar con el backend, usando caché local");
     }
   }, []);
@@ -265,7 +270,6 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
   const agregar = useCallback(async (item: CatalogoItem, medio: Medio, estado?: Estado) => {
     const porDefecto: Estado = estado ?? (medio === "anime" ? "por-ver" : "por-leer");
 
-    // Optimistic update
     const nuevaEntrada: Entrada = {
       listaId: null,
       id: item.id,
@@ -292,7 +296,6 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
       return [...prev, nuevaEntrada];
     });
 
-    // Backend call
     try {
       const payload: CrearListaPayload = {
         tenraiId: String(item.id),
@@ -303,7 +306,6 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
       };
       const resultado = await agregarALista(payload);
 
-      // Actualizar con el ID del backend y la URL de respaldo
       setEntradas(prev =>
         prev.map(e =>
           e.medio === medio && e.id === item.id
@@ -313,7 +315,6 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
       );
     } catch (err) {
       console.error("Error agregando al backend:", err);
-      // Revertir optimistic update si falla
       setEntradas(prev => prev.filter(e => !(e.medio === medio && e.id === item.id)));
     }
   }, []);
@@ -322,16 +323,13 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
   const quitar = useCallback(async (medio: Medio, id: number) => {
     const entrada = entradas.find(e => e.medio === medio && e.id === id);
 
-    // Optimistic update
     setEntradas(prev => prev.filter(e => !(e.medio === medio && e.id === id)));
 
-    // Backend call
     if (entrada?.listaId) {
       try {
         await eliminarDeLista(entrada.listaId);
       } catch (err) {
         console.error("Error eliminando del backend:", err);
-        // Revertir si falla
         if (entrada) setEntradas(prev => [...prev, entrada]);
       }
     }
@@ -342,12 +340,10 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
     const entrada = entradas.find(e => e.medio === medio && e.id === id);
     if (!entrada) return;
 
-    // Optimistic update
     setEntradas(prev =>
       prev.map(e => (e.medio === medio && e.id === id ? { ...e, ...cambios } : e)),
     );
 
-    // Backend call
     if (entrada.listaId) {
       try {
         const payload: ActualizarListaPayload = {};
@@ -364,7 +360,6 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
         await actualizarLista(entrada.listaId, payload);
       } catch (err) {
         console.error("Error actualizando en backend:", err);
-        // Revertir optimistic update
         setEntradas(prev =>
           prev.map(e => (e.medio === medio && e.id === id ? entrada : e)),
         );
@@ -381,7 +376,7 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const crearGrupo = useCallback(async (g: Omit<Grupo, "id" | "creadoEn" | "listas" | "externos">) => {
+  const crearGrupo = useCallback(async (g: Omit<Grupo, "id" | "creadoEn" | "listas">) => {
     try {
       const nuevo = await crearGrupoApi({
         titulo: g.titulo,
@@ -395,7 +390,6 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const actualizarGrupo = useCallback(async (id: string, cambios: Partial<Grupo>) => {
-    // Optimistic update
     setGrupos(prev => prev.map(g => (g.id === id ? { ...g, ...cambios } : g)));
 
     try {
@@ -432,7 +426,7 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const crearListaGrupo = useCallback(async (grupoId: string, nombre: string) => {
+  const crearListaGrupo = useCallback(async (grupoId: string, nombre: string): Promise<string | null> => {
     try {
       const { crearListaGrupo: crearListaApi } = await import("../api/grupoService");
       const nueva = await crearListaApi(grupoId, { nombre });
@@ -443,8 +437,10 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
           listas: [...g.listas, { id: nueva.id, nombre: nueva.nombre, orden: nueva.orden, items: [] }],
         };
       }));
+      return nueva.id;
     } catch (err) {
       console.error("Error creando lista:", err);
+      return null;
     }
   }, []);
 
@@ -476,33 +472,43 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
     }
   }, [sincronizarConBackend]);
 
-  const agregarItemGrupo = useCallback(async (listaId: string, medio: Medio, tenraiId: string, externo?: ItemExterno) => {
-    const clave = `${medio}:${tenraiId}`;
-    // Optimistic update
+  const agregarItemGrupo = useCallback(async (listaId: string, medio: Medio, tenraiId: string, datosCatalogo?: Record<string, unknown>) => {
+    const c = `${medio}:${tenraiId}`;
+    const datos = datosCatalogo ?? {};
+    const entradaLocal = entradas.find(e => e.medio === medio && String(e.id) === tenraiId);
+    const images = (datos as any)?.images;
+    const img = images?.jpg?.large_image_url || images?.jpg?.image_url || (datos as any)?.img || entradaLocal?.img || "";
+    const titulo = (datos as any)?.title || entradaLocal?.titulo || "";
+    const tipo = (datos as any)?.type || entradaLocal?.tipo || "";
+
     setGrupos(prev => prev.map(g => ({
       ...g,
-      listas: g.listas.map(l => (l.id === listaId ? { ...l, items: [...l.items, clave] } : l)),
-      externos: externo ? [...g.externos, externo] : g.externos,
+      listas: g.listas.map(l => (l.id === listaId
+        ? { ...l, items: [...l.items, { clave: c, medio, tenraiId, titulo, img, tipo, datosCatalogo: datos, esExterno: !!datosCatalogo }] }
+        : l)),
     })));
     try {
-      const { agregarItemGrupo: agregarItemApi, agregarExternoGrupo: agregarExternoApi } = await import("../api/grupoService");
-      if (externo) {
-        // Buscar el grupoId de la lista
-        const grupo = grupos.find(g => g.listas.some(l => l.id === listaId));
-        if (grupo) await agregarExternoApi(grupo.id, externo as any);
-      }
-      await agregarItemApi(listaId, { medio, tenraiId });
+      const { agregarItemGrupo: agregarItemApi } = await import("../api/grupoService");
+      const resultado = await agregarItemApi(listaId, { medio, tenraiId, datosCatalogo: datosCatalogo });
+      setGrupos(prev => prev.map(g => ({
+        ...g,
+        listas: g.listas.map(l => (l.id === listaId
+          ? { ...l, items: l.items.map(item => item.clave === c
+              ? { ...item, titulo: resultado.titulo || item.titulo, img: resultado.img || item.img, tipo: resultado.tipo || item.tipo, datosCatalogo: resultado.datosCatalogo || item.datosCatalogo, esExterno: resultado.esExterno }
+              : item) }
+          : l)),
+      })));
     } catch (err) {
       console.error("Error agregando item:", err);
       sincronizarConBackend();
     }
-  }, [grupos, sincronizarConBackend]);
+  }, [sincronizarConBackend, entradas]);
 
   const eliminarItemGrupo = useCallback(async (listaId: string, medio: Medio, tenraiId: string) => {
     const clave = `${medio}:${tenraiId}`;
     setGrupos(prev => prev.map(g => ({
       ...g,
-      listas: g.listas.map(l => (l.id === listaId ? { ...l, items: l.items.filter(i => i !== clave) } : l)),
+      listas: g.listas.map(l => (l.id === listaId ? { ...l, items: l.items.filter(i => i.clave !== clave) } : l)),
     })));
     try {
       const { eliminarItemGrupo: eliminarItemApi } = await import("../api/grupoService");
@@ -513,36 +519,39 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
     }
   }, [sincronizarConBackend]);
 
-  const agregarExternoGrupo = useCallback(async (grupoId: string, externo: ItemExterno) => {
-    setGrupos(prev => prev.map(g => {
-      if (g.id !== grupoId) return g;
-      return { ...g, externos: [...g.externos, externo] };
-    }));
+  const reordenarItemsGrupo = useCallback(async (listaId: string, items: { medio: Medio; tenraiId: string }[]) => {
+    const clavesNuevas = items.map(i => `${i.medio}:${i.tenraiId}`);
+    setGrupos(prev => {
+      const grupo = prev.find(g => g.listas.some(l => l.id === listaId));
+      const lista = grupo?.listas.find(l => l.id === listaId);
+      const itemsMap = new Map((lista?.items ?? []).map(item => [item.clave, item]));
+      return prev.map(g => ({
+        ...g,
+        listas: g.listas.map(l => (l.id === listaId
+          ? { ...l, items: clavesNuevas.map(k => itemsMap.get(k) ?? { clave: k, medio: k.split(":")[0] as Medio, tenraiId: k.split(":")[1], titulo: "", img: "", tipo: "", datosCatalogo: {}, esExterno: false }) }
+          : l)),
+      }));
+    });
     try {
-      const { agregarExternoGrupo: agregarExternoApi } = await import("../api/grupoService");
-      await agregarExternoApi(grupoId, {
-        medio: externo.medio,
-        tenraiId: String(externo.id),
-        titulo: externo.titulo,
-        img: externo.img,
-        tipo: externo.tipo,
-      });
+      const { reordenarItemsLista } = await import("../api/grupoService");
+      const resultado = await reordenarItemsLista(listaId, items);
+      setGrupos(prev => prev.map(g => ({
+        ...g,
+        listas: g.listas.map(l => (l.id === listaId
+          ? { ...l, items: resultado.map(i => ({
+              clave: i.clave,
+              medio: i.medio as Medio,
+              tenraiId: i.tenraiId,
+              titulo: i.titulo,
+              img: i.img,
+              tipo: i.tipo,
+              datosCatalogo: i.datosCatalogo,
+              esExterno: i.esExterno,
+            }))}
+          : l)),
+      })));
     } catch (err) {
-      console.error("Error agregando externo:", err);
-      sincronizarConBackend();
-    }
-  }, [sincronizarConBackend]);
-
-  const eliminarExternoGrupo = useCallback(async (grupoId: string, clave: string) => {
-    setGrupos(prev => prev.map(g => {
-      if (g.id !== grupoId) return g;
-      return { ...g, externos: g.externos.filter(e => e.clave !== clave) };
-    }));
-    try {
-      const { eliminarExternoGrupo: eliminarExternoApi } = await import("../api/grupoService");
-      await eliminarExternoApi(grupoId, clave);
-    } catch (err) {
-      console.error("Error eliminando externo:", err);
+      console.error("Error reordenando items:", err);
       sincronizarConBackend();
     }
   }, [sincronizarConBackend]);
@@ -579,8 +588,7 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
     eliminarListaGrupo,
     agregarItemGrupo,
     eliminarItemGrupo,
-    agregarExternoGrupo,
-    eliminarExternoGrupo,
+    reordenarItemsGrupo,
     setPerfil,
     sincronizarConAuth,
     sincronizarConBackend,
@@ -591,7 +599,7 @@ export function BibliotecaProvider({ children }: { children: ReactNode }) {
     entradas, grupos, perfil, clave, agregar, quitar, actualizar,
     reordenar, crearGrupo, actualizarGrupo, eliminarGrupo,
     subirPortadaGrupo, crearListaGrupo, actualizarListaGrupo, eliminarListaGrupo,
-    agregarItemGrupo, eliminarItemGrupo, agregarExternoGrupo, eliminarExternoGrupo,
+    agregarItemGrupo, eliminarItemGrupo, reordenarItemsGrupo,
     setPerfil, sincronizarConAuth, sincronizarConBackend,
     preferencias, setPreferencias, reemplazarTodo,
   ]);

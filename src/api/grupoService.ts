@@ -7,6 +7,11 @@ export interface GrupoListaItem {
   medio: string;
   tenraiId: string;
   orden: number;
+  datosCatalogo: Record<string, unknown>;
+  titulo: string;
+  img: string;
+  tipo: string;
+  esExterno: boolean;
 }
 
 export interface GrupoLista {
@@ -16,15 +21,6 @@ export interface GrupoLista {
   items: GrupoListaItem[];
 }
 
-export interface GrupoExterno {
-  clave: string;
-  medio: string;
-  tenraiId: string;
-  titulo: string;
-  img: string;
-  tipo: string;
-}
-
 export interface GrupoEntrada {
   id: string;
   titulo: string;
@@ -32,7 +28,6 @@ export interface GrupoEntrada {
   portadaUrl: string | null;
   etiquetas: string[];
   listas: GrupoLista[];
-  externos: GrupoExterno[];
   creadoEn: string;
 }
 
@@ -57,9 +52,7 @@ export interface AgregarItemGrupoPayload {
   medio: 'anime' | 'manga';
   tenraiId: string;
   orden?: number;
-  titulo?: string;
-  img?: string;
-  tipo?: string;
+  datosCatalogo?: Record<string, unknown>;
 }
 
 // ─── GRUPOS ─────────────────────────────────────────────────────────────────
@@ -140,19 +133,10 @@ export async function eliminarItemGrupo(
   await api.delete(`/grupo/listas/${listaId}/items/${medio}/${tenraiId}`);
 }
 
-// ─── EXTERNOS ───────────────────────────────────────────────────────────────
-
-export async function agregarExternoGrupo(
-  grupoId: string,
-  payload: AgregarItemGrupoPayload,
-): Promise<GrupoExterno> {
-  const res = await api.post<GrupoExterno>(`/grupo/${grupoId}/externos`, payload);
+export async function reordenarItemsLista(
+  listaId: string,
+  items: { medio: string; tenraiId: string }[],
+): Promise<GrupoListaItem[]> {
+  const res = await api.patch<GrupoListaItem[]>(`/grupo/listas/${listaId}/items`, { items });
   return res.data;
-}
-
-export async function eliminarExternoGrupo(
-  grupoId: string,
-  clave: string,
-): Promise<void> {
-  await api.delete(`/grupo/${grupoId}/externos/${encodeURIComponent(clave)}`);
 }

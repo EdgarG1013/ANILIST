@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft, Plus, Trash2, GripVertical, X, Search, Loader2, Library, Globe, ImageIcon, Pencil, Check,
 } from "lucide-react";
-import { useBiblioteca, type ItemExterno, type ListaPersonalizada } from "../../store/biblioteca";
+import { useBiblioteca, type ListaPersonalizada } from "../../store/biblioteca";
 import { buscarCatalogo, type CatalogoItem, type Medio } from "../../api/jikanClient";
 import DeleteConfirmModal from "../../components/compartido/DeleteConfirmModal";
 import Select from "../../components/ui/Select";
@@ -20,20 +20,9 @@ const ORDENES: { valor: Orden; etiqueta: string }[] = [
   { valor: "fecha-asc", etiqueta: "Fecha de guardado (antiguo)" },
 ];
 
-interface ItemVista {
-  clave: string;
-  id: number;
-  medio: Medio;
-  titulo: string;
-  img: string;
-  tipo: string;
-  agregado: string;
-  externo: boolean;
-}
-
 export default function GrupoDetallePage() {
   const { id } = useParams();
-  const { grupos, entradas, clave, actualizarGrupo, subirPortadaGrupo } = useBiblioteca();
+  const { grupos, entradas, clave, actualizarGrupo, subirPortadaGrupo, crearListaGrupo, eliminarListaGrupo, actualizarListaGrupo, agregarItemGrupo, eliminarItemGrupo, reordenarItemsGrupo } = useBiblioteca();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const grupo = grupos.find(g => g.id === id);
 
@@ -72,20 +61,18 @@ export default function GrupoDetallePage() {
     () => new Map(entradas.map(e => [clave(e.medio, e.id), e])),
     [entradas, clave],
   );
-  const mapaExternos = useMemo(
-    () => new Map((grupo?.externos ?? []).map(x => [x.clave, x])),
-    [grupo],
-  );
 
-  const items: ItemVista[] = useMemo(() => {
+  const items = useMemo(() => {
     if (!activa) return [];
-    const base = activa.items.map<ItemVista | null>(k => {
-      const e = mapaEntradas.get(k);
-      if (e) return { clave: k, id: e.id, medio: e.medio, titulo: e.titulo, img: e.img, tipo: e.tipo, agregado: e.agregado, externo: false };
-      const x = mapaExternos.get(k);
-      if (x) return { ...x, agregado: "", externo: true };
-      return null;
-    }).filter(Boolean) as ItemVista[];
+    const base = activa.items.map(it => {
+      const entrada = mapaEntradas.get(it.clave);
+      return {
+        ...it,
+        id: Number(it.tenraiId),
+        agregado: entrada?.agregado ?? "",
+        esExterno: it.esExterno,
+      };
+    });
     switch (orden) {
       case "alfa-asc": return [...base].sort((a, b) => a.titulo.localeCompare(b.titulo, "es"));
       case "alfa-desc": return [...base].sort((a, b) => b.titulo.localeCompare(a.titulo, "es"));
@@ -93,7 +80,7 @@ export default function GrupoDetallePage() {
       case "fecha-desc": return [...base].sort((a, b) => b.agregado.localeCompare(a.agregado));
       default: return base;
     }
-  }, [activa, mapaEntradas, mapaExternos, orden]);
+  }, [activa, mapaEntradas, orden]);
 
   if (!grupo) {
     return (
@@ -104,36 +91,36 @@ export default function GrupoDetallePage() {
     );
   }
 
-  const guardarLista = (nueva: ListaPersonalizada) =>
-    actualizarGrupo(grupo.id, { listas: grupo.listas.map(l => (l.id === nueva.id ? nueva : l)) });
-
-  const guardarItems = (claves: string[]) => activa && guardarLista({ ...activa, items: claves });
-
   const mover = (k: string, posicion: number) => {
+    if (!activa) return;
     const claves = items.map(i => i.clave);
     const desde = claves.indexOf(k);
     const hasta = Math.min(Math.max(posicion - 1, 0), claves.length - 1);
     if (desde === -1 || desde === hasta) return;
     claves.splice(hasta, 0, claves.splice(desde, 1)[0]);
-    guardarItems(claves);
-  };
-
-  const agregarClave = (k: string, externo?: ItemExterno) => {
-    if (!activa || activa.items.includes(k)) return;
-    actualizarGrupo(grupo.id, {
-      listas: grupo.listas.map(l => (l.id === activa.id ? { ...l, items: [...l.items, k] } : l)),
-      externos: externo && !mapaExternos.has(k) ? [...grupo.externos, externo] : grupo.externos,
+    const nuevosItems = claves.map(c => {
+      const partes = c.split(':');
+      return { medio: partes[0] as Medio, tenraiId: partes[1] };
     });
+    reordenarItemsGrupo(activa.id, nuevosItems);
   };
 
-  const nuevaLista = () => {
-    const nueva: ListaPersonalizada = { id: crypto.randomUUID(), nombre: `Lista ${grupo.listas.length + 1}`, items: [], orden: grupo.listas.length };
-    actualizarGrupo(grupo.id, { listas: [...grupo.listas, nueva] });
-    setListaActiva(nueva.id);
+  const agregarItem = (medio: Medio, tenraiId: string, datosCatalogo?: Record<string, unknown>) => {
+    if (!activa) return;
+    const k = `${medio}:${tenraiId}`;
+    if (activa.items.some(i => i.clave === k)) return;
+    agregarItemGrupo(activa.id, medio, tenraiId, datosCatalogo);
   };
+
+  const nuevaLista = async () => {
+    const nuevaId = await crearListaGrupo(grupo.id, `Lista ${grupo.listas.length + 1}`);
+    if (nuevaId) setListaActiva(nuevaId);
+  };
+
+  const clavesActivas = useMemo(() => new Set(activa?.items.map(i => i.clave) ?? []), [activa]);
 
   const disponibles = entradas
-    .filter(e => !activa?.items.includes(clave(e.medio, e.id)))
+    .filter(e => !clavesActivas.has(clave(e.medio, e.id)))
     .filter(e => !busqueda.trim() || e.titulo.toLowerCase().includes(busqueda.trim().toLowerCase()));
 
   const campo = "w-full h-10 bg-[#16141e] border border-[#2a2140] rounded-xl px-3 text-sm focus:outline-none focus:border-[#946ed9]";
@@ -232,7 +219,7 @@ export default function GrupoDetallePage() {
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
             <input
               value={activa.nombre}
-              onChange={e => guardarLista({ ...activa, nombre: e.target.value })}
+              onChange={e => actualizarListaGrupo(activa.id, { nombre: e.target.value })}
               aria-label="Nombre de la lista"
               className="flex-1 h-10 bg-[#16141e] border border-[#2a2140] rounded-xl px-3 text-sm font-semibold focus:outline-none focus:border-[#946ed9]"
               style={{ fontFamily: "'Oxanium', sans-serif" }}
@@ -288,11 +275,11 @@ export default function GrupoDetallePage() {
                     <p className="text-xs text-[#8b82a8] truncate">
                       <span className="uppercase">{it.medio}</span>
                       {it.tipo ? ` · ${it.tipo}` : ""}
-                      {it.externo ? " · fuera de mis listas" : ""}
+                      {it.esExterno ? " · fuera de mis listas" : ""}
                     </p>
                   </div>
                   <button
-                    onClick={() => guardarItems(activa.items.filter(x => x !== it.clave))}
+                    onClick={() => eliminarItemGrupo(activa.id, it.medio, it.tenraiId)}
                     aria-label={`Quitar ${it.titulo} de ${activa.nombre}`}
                     className="w-9 h-9 rounded-lg border border-[#2a2140] text-[#8b82a8] hover:text-[#ff9aa8] flex items-center justify-center shrink-0"
                   >
@@ -306,7 +293,7 @@ export default function GrupoDetallePage() {
           {/* Agregar títulos */}
           <section className="bg-[#110f1a] border border-[#2a2140] rounded-2xl p-4">
             <h2 className="text-sm font-semibold mb-3" style={{ fontFamily: "'Oxanium', sans-serif" }}>
-              Agregar títulos a “{activa.nombre}”
+              Agregar títulos a "{activa.nombre}"
             </h2>
             <div className="flex flex-wrap gap-2 mb-3">
               {([["biblioteca", "Mi biblioteca", Library], ["externo", "Buscar en el catálogo", Globe]] as const).map(([v, label, Icono]) => (
@@ -352,7 +339,7 @@ export default function GrupoDetallePage() {
                     return (
                       <li key={k}>
                         <button
-                          onClick={() => agregarClave(k)}
+                          onClick={() => agregarItem(e.medio, String(e.id))}
                           className="w-full flex items-center gap-2 bg-[#16141e] border border-[#2a2140] rounded-xl p-2 text-left hover:border-[#946ed9]/60"
                         >
                           <img src={e.img} alt="" className="w-8 h-11 object-cover rounded bg-[#1c1928]" loading="lazy" />
@@ -375,12 +362,12 @@ export default function GrupoDetallePage() {
               <ul className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 max-h-80 overflow-y-auto">
                 {resultados.map(r => {
                   const k = `${medioBusqueda}:${r.id}`;
-                  const ya = activa.items.includes(k);
+                  const ya = clavesActivas.has(k);
                   return (
                     <li key={k}>
                       <button
                         disabled={ya}
-                        onClick={() => agregarClave(k, { clave: k, id: r.id, medio: medioBusqueda, titulo: r.title, img: r.img, tipo: r.type })}
+                        onClick={() => agregarItem(medioBusqueda, String(r.id), r as unknown as Record<string, unknown>)}
                         className="w-full flex items-center gap-2 bg-[#16141e] border border-[#2a2140] rounded-xl p-2 text-left hover:border-[#946ed9]/60 disabled:opacity-40"
                       >
                         <img src={r.img} alt="" className="w-8 h-11 object-cover rounded bg-[#1c1928]" loading="lazy" />
@@ -404,7 +391,7 @@ export default function GrupoDetallePage() {
         onClose={() => setAEliminarLista(null)}
         onConfirm={() => {
           if (aEliminarLista) {
-            actualizarGrupo(grupo.id, { listas: grupo.listas.filter(l => l.id !== aEliminarLista.id) });
+            eliminarListaGrupo(aEliminarLista.id);
             setListaActiva(null);
             setAEliminarLista(null);
           }
