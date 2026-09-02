@@ -27,6 +27,12 @@ interface AuthCtx {
 
 const Ctx = createContext<AuthCtx | null>(null);
 
+function bustUrl(url: string | null): string | null {
+  if (!url) return url;
+  const base = url.split('?')[0];
+  return `${base}?t=${Date.now()}`;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<UsuarioAuth | null>(() =>
     authService.obtenerUsuarioLocal(),
@@ -41,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: res.data.id,
         nombre: res.data.nombre,
         correo: res.data.correo,
-        avatar: res.data.avatar,
+        avatar: bustUrl(res.data.avatar),
         preferencias: res.data.preferencias ?? null,
       };
       setUsuario(u);
@@ -64,12 +70,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (correo: string, password: string) => {
     const res = await authService.iniciarSesion(correo, password);
-    setUsuario(res.data.usuario);
+    setUsuario({ ...res.data.usuario, avatar: bustUrl(res.data.usuario.avatar) });
   };
 
   const register = async (nombre: string, correo: string, password: string) => {
     const res = await authService.registrar(nombre, correo, password);
-    setUsuario(res.data.usuario);
+    setUsuario({ ...res.data.usuario, avatar: bustUrl(res.data.usuario.avatar) });
     return res;
   };
 

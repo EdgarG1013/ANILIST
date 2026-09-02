@@ -1,12 +1,14 @@
 import { useRef, useState } from "react";
 import { Upload, Download, User, KeyRound, FileJson, FileText, ShieldAlert, Camera } from "lucide-react";
 import { useBiblioteca, type Entrada, type Grupo } from "../../store/biblioteca";
+import { useAuth } from "../../store/auth";
 import api from "../../api/axios";
 
 // ─── Configuración de cuenta, importación y exportación ──────────────────────
 
 export default function ConfiguracionPage() {
   const { perfil, setPerfil, entradas, grupos, reemplazarTodo, preferencias, setPreferencias } = useBiblioteca();
+  const { actualizarUsuario } = useAuth();
   const [nombre, setNombre] = useState(perfil.nombre);
   const [correo, setCorreo] = useState(perfil.correo);
   const [mensaje, setMensaje] = useState<string | null>(null);
@@ -135,6 +137,7 @@ export default function ConfiguracionPage() {
                     headers: { "Content-Type": "multipart/form-data" },
                   });
                   setPerfil({ avatar: res.data.avatar });
+                  actualizarUsuario({ avatar: res.data.avatar });
                   setMensaje("Foto de perfil actualizada.");
                 } catch {
                   setMensaje("Error al subir la foto de perfil.");
@@ -187,7 +190,15 @@ export default function ConfiguracionPage() {
           <input
             type="checkbox"
             checked={!preferencias.sfw}
-            onChange={e => setPreferencias({ sfw: !e.target.checked })}
+            onChange={async e => {
+              const nuevoSfw = !e.target.checked;
+              setPreferencias({ sfw: nuevoSfw });
+              try {
+                await api.patch("/auth/preferencias", { sfw: nuevoSfw });
+              } catch {
+                setMensaje("Error al guardar preferencias.");
+              }
+            }}
             className="mt-1 w-4 h-4 accent-[#946ed9]"
           />
           <span>
