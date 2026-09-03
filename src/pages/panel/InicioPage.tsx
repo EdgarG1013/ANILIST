@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Newspaper, CalendarClock, Sparkles, BookOpen, ExternalLink } from "lucide-react";
-import { buscarCatalogo, obtenerNoticias, type CatalogoItem, type Medio, type Noticia } from "../../api/jikanClient";
+import { obtenerProximos, obtenerTopAnime, obtenerTopManga, obtenerNoticias, type CatalogoItem, type Noticia, type Medio } from "../../api/catalogoService";
 import { useBiblioteca } from "../../store/biblioteca";
 import { useAuth } from "../../store/auth";
 import { TipoBadge, PuntuacionBadge } from "../../components/landing/badges";
@@ -60,15 +60,22 @@ export default function InicioPage() {
   useEffect(() => {
     let vivo = true;
     Promise.allSettled([
-      buscarCatalogo({ medio: "anime", estado: "upcoming", orden: "popularity:asc" }),
-      buscarCatalogo({ medio: "anime", orden: "score:desc" }),
-      buscarCatalogo({ medio: "manga", orden: "score:desc" }),
+      obtenerProximos(),
+      obtenerTopAnime(),
+      obtenerTopManga(),
       obtenerNoticias(5),
     ]).then(([p, a, m, n]) => {
       if (!vivo) return;
-      if (p.status === "fulfilled") setProximos(p.value.items);
-      if (a.status === "fulfilled") setAnimes(a.value.items);
-      if (m.status === "fulfilled") setMangas(m.value.items);
+      // Top anime/manga devuelven PopularItem[], convertir a CatalogoItem[]
+      if (p.status === "fulfilled") setProximos(p.value);
+      if (a.status === "fulfilled") setAnimes(a.value.map(i => ({
+        id: i.id, title: i.title, img: i.img, type: "", year: i.year,
+        score: null, status: "", genres: i.genres, synopsis: i.synopsis, total: i.count,
+      })));
+      if (m.status === "fulfilled") setMangas(m.value.map(i => ({
+        id: i.id, title: i.title, img: i.img, type: "", year: i.year,
+        score: null, status: "", genres: i.genres, synopsis: i.synopsis, total: i.count,
+      })));
       if (n.status === "fulfilled") setNoticias(n.value);
       setCargando(false);
     });

@@ -9,7 +9,7 @@ import Select from "../../components/ui/Select";
 import {
   buscarCatalogo, buscarPorTemporada, TIPOS, ESTADOS, GENEROS,
   type Temporada,
-} from "../../api/jikanClient";
+} from "../../api/catalogoService";
 
 // ─── Navegador de anime (Browse) ─────────────────────────────────────────────
 // Lee la URL (?type=..., ?genre=..., ?year=...&season=...) y muestra una grilla

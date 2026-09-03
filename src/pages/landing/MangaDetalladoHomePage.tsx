@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star } from "lucide-react";
-import { obtenerMangaDetalleApi, type MangaDetalle } from "../../api/mangaDetail";
+import { obtenerDetalleManga, type MangaDetalle } from "../../api/catalogoService";
 import MangaHeroBanner from "../../components/anime/MangaHeroBanner";
 import AnimeSynopsis from "../../components/anime/AnimeSynopsis";
 import AnimeCharacters from "../../components/anime/AnimeCharacters";
@@ -28,7 +28,7 @@ export default function MangaDetalladoPage() {
   useEffect(() => {
     let vivo = true;
     setCargando(true);
-    obtenerMangaDetalleApi(Number(id))
+    obtenerDetalleManga(Number(id))
       .then(d => vivo && setManga(d))
       .catch(() => vivo && setManga(null))
       .finally(() => vivo && setCargando(false));

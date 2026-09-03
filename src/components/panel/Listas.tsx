@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Trash2, GripVertical, Minus, Plus, ClipboardList } from "lucide-react";
-import type { Medio } from "../../api/jikanClient";
+import type { Medio } from "../../api/catalogoService";
 import {
   useBiblioteca, ESTADOS_ANIME, ESTADOS_MANGA, type Entrada, type Estado,
 } from "../../store/biblioteca";

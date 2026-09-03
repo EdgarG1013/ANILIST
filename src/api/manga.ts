@@ -1,4 +1,4 @@
-import type { JikanNamedResource, JikanImages, JikanDate, PopularItem } from "./jikan";
+import type { JikanNamedResource, JikanImages, JikanDate } from "./jikan";
 
 // ─── Tipos de manga (representación de la API de Jikan) ──────────────────────
 
@@ -16,26 +16,6 @@ export interface MangaJikan {
   chapters: number | null;
   score: number;
   type: string;
-}
-
-// ─── Adaptador: manga Jikan → item normalizado del carrusel ──────────────────
-
-export function toPopularManga(m: MangaJikan): PopularItem {
-  const count = m.volumes ?? m.chapters;
-  const countLabel = m.volumes != null ? "volumen" : "capítulo";
-  return {
-    id: m.mal_id,
-    title: m.title,
-    synopsis: m.synopsis,
-    genres: [
-      ...(m.genres || []),
-      ...(m.themes || []),
-    ].map((g: JikanNamedResource) => g.name),
-    year: m.year ?? m.published?.prop?.from?.year ?? null,
-    count,
-    countLabel,
-    img: m.images?.jpg?.large_image_url || m.images?.jpg?.image_url || "",
-  };
 }
 
 // ─── Top Manga — carrusel de más populares ────────────────────────────────────

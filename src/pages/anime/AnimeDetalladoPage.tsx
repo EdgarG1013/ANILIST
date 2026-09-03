@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, Tv } from "lucide-react";
-import { obtenerDetalleApi, type AnimeDetalle } from "../../api/animeDetail";
+import { obtenerDetalleAnime, type AnimeDetalle } from "../../api/catalogoService";
 import AnimeHeroBanner from "../../components/anime/AnimeHeroBanner";
 import AnimeSynopsis from "../../components/anime/AnimeSynopsis";
 import AnimeTrailer from "../../components/anime/AnimeTrailer";
@@ -23,7 +23,7 @@ export default function AnimeDetailsPage() {
   useEffect(() => {
     let vivo = true;
     setCargando(true);
-    obtenerDetalleApi(Number(id))
+    obtenerDetalleAnime(Number(id))
       .then(d => vivo && setAnime(d))
       .catch(() => vivo && setAnime(null))
       .finally(() => vivo && setCargando(false));

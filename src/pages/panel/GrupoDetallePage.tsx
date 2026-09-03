@@ -4,7 +4,7 @@ import {
   ArrowLeft, Plus, Trash2, GripVertical, X, Search, Loader2, Library, Globe, ImageIcon, Pencil, Check,
 } from "lucide-react";
 import { useBiblioteca, type ListaPersonalizada } from "../../store/biblioteca";
-import { buscarCatalogo, type CatalogoItem, type Medio } from "../../api/jikanClient";
+import { buscarCatalogo, type CatalogoItem, type Medio } from "../../api/catalogoService";
 import DeleteConfirmModal from "../../components/compartido/DeleteConfirmModal";
 import Select from "../../components/ui/Select";
 

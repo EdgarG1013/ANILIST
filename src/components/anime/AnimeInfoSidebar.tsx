@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Music, Play } from "lucide-react";
-import type { AnimeDetalle } from "../../api/animeDetail";
+import type { AnimeDetalle } from "../../api/catalogoService";
 
 const formatearNumero = (n: number) =>
   n >= 1000 ? `${(n / 1000).toFixed(1).replace(/\.0$/, "")} mil` : String(n);

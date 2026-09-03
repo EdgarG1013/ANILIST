@@ -1,7 +1,5 @@
 // ─── Tipos de datos ───────────────────────────────────────────────────────────
 
-import type { PopularItem } from "./jikan";
-
 /** Anime destacado en el hero / carrusel principal */
 export interface HeroAnime {
   id: number;
@@ -27,14 +25,6 @@ export interface AnimeCard {
   img: string;
 }
 
-/** Elemento del ranking Top Anime */
-export interface TopAnimeItem {
-  id: number;
-  title: string;
-  type: string;
-  img: string;
-}
-
 /** Anime de la sección "Más populares" con info extendida */
 export interface AnimePopular {
   rank: number;
@@ -45,20 +35,6 @@ export interface AnimePopular {
   genres: string[];
   synopsis: string;
   img: string;
-}
-
-/** Adaptador: anime popular → item normalizado del carrusel */
-export function toPopularAnime(a: AnimePopular): PopularItem {
-  return {
-    id: a.rank,
-    title: a.title,
-    synopsis: a.synopsis,
-    genres: a.genres,
-    year: a.year,
-    count: a.eps,
-    countLabel: "episodio",
-    img: a.img,
-  };
 }
 
 // ─── Colores por tipo de anime ────────────────────────────────────────────────
@@ -174,36 +150,6 @@ export const PROXIMAMENTE: AnimeCard[] = [
     type: "ONA",
     img: "https://cdn.myanimelist.net/images/anime/1880/158764l.jpg"
   },
-];
-
-// ─── Top Anime — ranking semanal ─────────────────────────────────────────────
-
-export const TOP_SEMANAL: TopAnimeItem[] = [
-  { id: 61316, title: "Re:Zero kara Hajimeru Isekai Seikatsu 4th Season", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F1a7fb8f72c6e87c31f4a24955637f11bdc296065.jpg?generation=1786160569657849&alt=media" },
-  { id: 61469, title: "Steel Ball Run: JoJo no Kimyou na Bouken", type: "ONA", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F4aa825c6b64fcc0c69cc7be0484dc3043f187b4c.jpg?generation=1786160569653404&alt=media" },
-  { id: 60636, title: "Bleach: Sennen Kessen-hen - Kashin-tan", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fdac84bf662747e635095d143a57aca2fdf79eeef.jpg?generation=1786160569661681&alt=media" },
-  { id: 21, title: "One Piece", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fc0af4a378a11dddc3376727c7e51b4ddbad4056c.jpg?generation=1786160569676855&alt=media" },
-  { id: 59193, title: "Mushoku Tensei III: Isekai Ittara Honki Dasu", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fe48ba9f20a17b4d07cf110abacdc986e34ed8848.jpg?generation=1786160569691254&alt=media" },
-  { id: 50250, title: "Chiikawa", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Faf2460ad066c3bb25cf6a0081b94fe1b7d6ea97f.jpg?generation=1786160569776707&alt=media" },
-  { id: 55809, title: "Xian Ni", type: "ONA", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fe6b5218dac9434144d8b8d1b3bd852271aa03825.jpg?generation=1786160569833331&alt=media" },
-  { id: 60988, title: "Tian Guan Cifu Short Films", type: "ONA", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fca4c39cf58ed1bd3ee6681fc3f859057e1584dc5.jpg?generation=1786160569824997&alt=media" },
-  { id: 61483, title: "Tenmaku no Jaadugar", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F817d52402a68152ae7935477a591cba335b79da4.jpg?generation=1786160569828739&alt=media" },
-  { id: 63832, title: "Seihantai na Kimi to Boku 2nd Season", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fabb4e0beb10a075034a132ec97a5258f127d72f9.jpg?generation=1786160569827580&alt=media" },
-];
-
-// ─── Top Anime — ranking mensual ──────────────────────────────────────────────
-
-export const TOP_MENSUAL: TopAnimeItem[] = [
-  { id: 16498, title: "Shingeki no Kyojin", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F03f9cd95d3a162bf982aa1ccb9a65c697e8115d9.jpg?generation=1780151446887126&alt=media" },
-  { id: 5114, title: "Fullmetal Alchemist: Brotherhood", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F1a7fb8f72c6e87c31f4a24955637f11bdc296065.jpg?generation=1786160569657849&alt=media" },
-  { id: 61469, title: "Steel Ball Run: JoJo no Kimyou na Bouken", type: "ONA", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F4aa825c6b64fcc0c69cc7be0484dc3043f187b4c.jpg?generation=1786160569653404&alt=media" },
-  { id: 38000, title: "Kimetsu no Yaiba", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F9f93c6413e608ae491ba456fac96fb11b04917d1.webp?generation=1786160569298445&alt=media" },
-  { id: 60636, title: "Bleach: Sennen Kessen-hen - Kashin-tan", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fdac84bf662747e635095d143a57aca2fdf79eeef.jpg?generation=1786160569661681&alt=media" },
-  { id: 21, title: "One Piece", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fc0af4a378a11dddc3376727c7e51b4ddbad4056c.jpg?generation=1786160569676855&alt=media" },
-  { id: 61316, title: "Re:Zero kara Hajimeru Isekai Seikatsu 4th Season", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2F1a7fb8f72c6e87c31f4a24955637f11bdc296065.jpg?generation=1786160569657849&alt=media" },
-  { id: 59193, title: "Mushoku Tensei III: Isekai Ittara Honki Dasu", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fe48ba9f20a17b4d07cf110abacdc986e34ed8848.jpg?generation=1786160569691254&alt=media" },
-  { id: 55809, title: "Xian Ni", type: "ONA", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fe6b5218dac9434144d8b8d1b3bd852271aa03825.jpg?generation=1786160569833331&alt=media" },
-  { id: 62542, title: "Grand Blue Season 3", type: "TV", img: "https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign.appspot.com/o/h2d-ext-asset%2Fcbf1677bc9f3ff0c1a90b8f3e35d69d11d6674d5.jpg?generation=1786160569626844&alt=media" },
 ];
 
 // ─── Más Populares — carrusel con sinopsis ────────────────────────────────────

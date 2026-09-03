@@ -1,44 +1,27 @@
 import { useEffect, useState } from "react";
 import MostPopularCarousel from "./MostPopularCarousel";
-import { buscarCatalogo, type CatalogoItem } from "../../api/jikanClient";
-import type { PopularItem } from "../../api/jikan";
+import { obtenerTopAnime, obtenerTopManga, type PopularItem } from "../../api/catalogoService";
 
 // ─── Sección: Más populares (anime y manga) ──────────────────────
 
-function aPopular(item: CatalogoItem, countLabel: string): PopularItem {
-  return {
-    id: item.id,
-    title: item.title,
-    synopsis: item.synopsis,
-    genres: item.genres,
-    year: item.year,
-    count: item.total,
-    countLabel,
-    img: item.img,
-  };
-}
-
 export default function MostPopularSection() {
-  const [animes, setAnimes] = useState<CatalogoItem[]>([]);
-  const [mangas, setMangas] = useState<CatalogoItem[]>([]);
+  const [animes, setAnimes] = useState<PopularItem[]>([]);
+  const [mangas, setMangas] = useState<PopularItem[]>([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     let vivo = true;
     Promise.allSettled([
-      buscarCatalogo({ medio: "anime", orden: "popularity:asc" }),
-      buscarCatalogo({ medio: "manga", orden: "popularity:asc" }),
+      obtenerTopAnime(),
+      obtenerTopManga(),
     ]).then(([a, m]) => {
       if (!vivo) return;
-      if (a.status === "fulfilled") setAnimes(a.value.items);
-      if (m.status === "fulfilled") setMangas(m.value.items);
+      if (a.status === "fulfilled") setAnimes(a.value);
+      if (m.status === "fulfilled") setMangas(m.value);
       setCargando(false);
     });
     return () => { vivo = false; };
   }, []);
-
-  const itemsAnime = animes.slice(0, 5).map(i => aPopular(i, "episodio"));
-  const itemsManga = mangas.slice(0, 5).map(i => aPopular(i, "capítulo"));
 
   if (cargando) {
     return (
@@ -58,13 +41,13 @@ export default function MostPopularSection() {
         title="Top Anime"
         viewAllLabel="Ver todo"
         basePath="/explorar?type=popular"
-        items={itemsAnime}
+        items={animes}
       />
       <MostPopularCarousel
         title="Top Manga"
         viewAllLabel="Ver todo"
         basePath="/explorar?type=popular&medio=manga"
-        items={itemsManga}
+        items={mangas}
         reverse
       />
     </section>

@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Star, Save, Loader2 } from "lucide-react";
 import { useBiblioteca, ESTADOS_ANIME, ESTADOS_MANGA, type Estado } from "../../store/biblioteca";
-import { pedirJikan } from "../../api/jikanClient";
-import type { Medio } from "../../api/jikanClient";
+import { obtenerBasico, type Medio } from "../../api/catalogoService";
 import Select from "../../components/ui/Select";
 
 // ─── Página reutilizable para gestionar el estado de un anime/manga ─────────
@@ -42,21 +41,14 @@ export default function EstadoPage() {
     if (!idNum) return;
     let vivo = true;
     setCargandoApi(true);
-    const endpoint = medioSeguro === "anime"
-      ? `/anime/${idNum}`
-      : `/manga/${idNum}`;
 
-    pedirJikan<{ data: Record<string, unknown> }>(endpoint)
-      .then(json => {
+    obtenerBasico(medioSeguro, idNum)
+      .then(d => {
         if (!vivo) return;
-        const d = json.data;
-        const img = ((d.images as Record<string, Record<string, string>>)?.jpg?.large_image_url)
-          || ((d.images as Record<string, Record<string, string>>)?.jpg?.image_url)
-          || "";
         setDetalle({
-          titulo: (d.title as string) || "",
-          img,
-          total: (d.episodes as number | null) ?? (d.chapters as number | null) ?? null,
+          titulo: d.title,
+          img: d.img,
+          total: d.total,
         });
       })
       .catch(() => {})

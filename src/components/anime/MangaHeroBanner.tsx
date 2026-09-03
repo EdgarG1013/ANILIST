@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Star, BookOpen, ClipboardList, Trash2 } from "lucide-react";
-import type { MangaDetalle } from "../../api/mangaDetail";
+import type { MangaDetalle } from "../../api/catalogoService";
 import { useBiblioteca } from "../../store/biblioteca";
 import { useAuth } from "../../store/auth";
 import DeleteConfirmModal from "../compartido/DeleteConfirmModal";

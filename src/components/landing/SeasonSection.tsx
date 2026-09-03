@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Flame, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { buscarCatalogo, type CatalogoItem } from "../../api/jikanClient";
+import { obtenerEnTemporada, type CatalogoItem } from "../../api/catalogoService";
 import { TipoBadge, PuntuacionBadge } from "./badges";
 
 // ─── Sección: En Temporada ────────────────────────────────────────────────────
@@ -12,8 +12,8 @@ export default function SeasonSection() {
 
   useEffect(() => {
     let vivo = true;
-    buscarCatalogo({ medio: "anime", estado: "airing", orden: "popularity:asc" })
-      .then(r => vivo && setItems(r.items))
+    obtenerEnTemporada()
+      .then(r => vivo && setItems(r))
       .catch(() => vivo && setItems([]))
       .finally(() => vivo && setCargando(false));
     return () => { vivo = false; };

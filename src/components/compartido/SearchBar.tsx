@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Loader2 } from "lucide-react";
-import { buscarCatalogo, type CatalogoItem } from "../../api/jikanClient";
+import { buscarCatalogo, type CatalogoItem } from "../../api/catalogoService";
 
 // ─── Barra de búsqueda con sugerencias en vivo ───────────────────────────────
 // Al escribir, consulta anime y manga y muestra hasta 6 coincidencias.

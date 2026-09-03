@@ -1,5 +1,5 @@
 import { Users } from "lucide-react";
-import type { Personaje } from "../../api/animeDetail";
+import type { Personaje } from "../../api/catalogoService";
 
 export default function AnimeCharacters({ personajes }: { personajes: Personaje[] }) {
   if (personajes.length === 0) return null;

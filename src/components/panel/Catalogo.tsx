@@ -4,7 +4,7 @@ import { Search, Check, Plus, Loader2, AlertCircle } from "lucide-react";
 import {
   buscarCatalogo, TIPOS, ESTADOS, GENEROS, ANIOS, LETRAS, ORDENES, TEMPORADAS,
   type CatalogoItem, type Medio,
-} from "../../api/jikanClient";
+} from "../../api/catalogoService";
 import { useBiblioteca } from "../../store/biblioteca";
 import { TipoBadge, PuntuacionBadge } from "../landing/badges";
 import Select from "../ui/Select";
