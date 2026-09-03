@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FolderPlus, Trash2, Layers, Search, ImageIcon } from "lucide-react";
 import { useBiblioteca, type Grupo } from "../../store/biblioteca";
@@ -7,13 +7,22 @@ import DeleteConfirmModal from "../../components/compartido/DeleteConfirmModal";
 // ─── Grupos: índice de colecciones. El detalle vive en /panel/grupos/:id ─────
 
 export default function GruposPage() {
-  const { grupos, crearGrupo, eliminarGrupo } = useBiblioteca();
+  const { grupos, crearGrupo, eliminarGrupo, subirPortadaGrupo } = useBiblioteca();
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [portada, setPortada] = useState("");
   const [etiquetas, setEtiquetas] = useState("");
   const [filtro, setFiltro] = useState("");
   const [aEliminar, setAEliminar] = useState<Grupo | null>(null);
+  const [ultimoGrupoId, setUltimoGrupoId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const prevGruposLengthRef = useRef(grupos.length);
+
+  useEffect(() => {
+    if (grupos.length > prevGruposLengthRef.current) {
+      setUltimoGrupoId(grupos[grupos.length - 1].id);
+    }
+    prevGruposLengthRef.current = grupos.length;
+  }, [grupos]);
 
   const visibles = grupos.filter(g => {
     const t = filtro.trim().toLowerCase();
@@ -39,16 +48,16 @@ export default function GruposPage() {
 
       {/* Crear grupo */}
       <form
-        onSubmit={ev => {
+        onSubmit={async ev => {
           ev.preventDefault();
           if (!titulo.trim()) return;
-          crearGrupo({
+          await crearGrupo({
             titulo: titulo.trim(),
             descripcion: descripcion.trim(),
-            portada: portada.trim(),
+            portadaUrl: null,
             etiquetas: etiquetas.split(",").map(e => e.trim()).filter(Boolean),
           });
-          setTitulo(""); setDescripcion(""); setPortada(""); setEtiquetas("");
+          setTitulo(""); setDescripcion(""); setEtiquetas("");
         }}
         className="bg-[#110f1a] border border-[#2a2140] rounded-2xl p-4 mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
       >
@@ -61,8 +70,20 @@ export default function GruposPage() {
           <input id="g-desc" value={descripcion} onChange={e => setDescripcion(e.target.value)} placeholder="Lo que quiero revisitar" className={campo} />
         </div>
         <div>
-          <label htmlFor="g-portada" className="block text-xs text-[#8b82a8] mb-1">Portada (URL)</label>
-          <input id="g-portada" value={portada} onChange={e => setPortada(e.target.value)} placeholder="https://…" className={campo} />
+          <label htmlFor="g-portada" className="block text-xs text-[#8b82a8] mb-1">Portada</label>
+          <input type="file" id="g-portada" ref={fileInputRef} accept="image/*" className="hidden" onChange={async e => {
+            const archivo = e.target.files?.[0];
+            if (archivo && ultimoGrupoId) {
+              await subirPortadaGrupo(ultimoGrupoId, archivo);
+            }
+          }} />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className={campo + " text-left cursor-pointer"}
+          >
+            Seleccionar imagen…
+          </button>
         </div>
         <div>
           <label htmlFor="g-tags" className="block text-xs text-[#8b82a8] mb-1">Etiquetas (coma)</label>
@@ -104,8 +125,8 @@ export default function GruposPage() {
                   className="block h-full bg-[#110f1a] border border-[#2a2140] rounded-2xl overflow-hidden hover:border-[#946ed9]/60 transition-colors"
                 >
                   <div className="aspect-[16/7] bg-[#16141e] flex items-center justify-center">
-                    {g.portada ? (
-                      <img src={g.portada} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    {g.portadaUrl ? (
+                      <img src={g.portadaUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
                     ) : (
                       <ImageIcon className="w-8 h-8 text-[#2a2140]" aria-hidden="true" />
                     )}
