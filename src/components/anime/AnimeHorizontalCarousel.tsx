@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useCallback, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
-import type { AnimeCard } from "../../api/anime";
-import { TIPO_COLORES } from "../../api/anime";
+import type { AnimeCard } from "../../api/tiposService";
+import { TIPO_COLORES } from "../../api/tiposService";
 
 interface Props {
   titulo: string;
