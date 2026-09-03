@@ -29,8 +29,11 @@ const Ctx = createContext<AuthCtx | null>(null);
 
 function bustUrl(url: string | null): string | null {
   if (!url) return url;
-  const base = url.split('?')[0];
-  return `${base}?t=${Date.now()}`;
+  if (url.includes('supabase') || url.includes('/avatars/')) {
+    const base = url.split('?')[0];
+    return `${base}?t=${Date.now()}`;
+  }
+  return url;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
