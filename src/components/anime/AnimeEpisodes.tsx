@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tv } from "lucide-react";
-import type { Episodio } from "../../api/animeDetail";
+import type { Episodio } from "../../api/catalogoService";
 
 export default function AnimeEpisodes({ episodios }: { episodios: Episodio[] }) {
   const [verTodos, setVerTodos] = useState(false);

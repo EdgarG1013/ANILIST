@@ -1,5 +1,5 @@
 import { MonitorPlay, ExternalLink } from "lucide-react";
-import type { LinkExterno } from "../../api/animeDetail";
+import type { LinkExterno } from "../../api/catalogoService";
 
 export default function AnimeStreaming({ streaming }: { streaming: LinkExterno[] }) {
   if (streaming.length === 0) return null;

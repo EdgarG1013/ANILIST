@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import type { CatalogoItem, Medio } from "../api/jikanClient";
+import type { CatalogoItem, Medio } from "../api/catalogoService";
 import {
   obtenerListas,
   agregarALista,

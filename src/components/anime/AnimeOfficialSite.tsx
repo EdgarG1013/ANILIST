@@ -1,5 +1,5 @@
 import { Globe, ExternalLink } from "lucide-react";
-import type { LinkExterno } from "../../api/animeDetail";
+import type { LinkExterno } from "../../api/catalogoService";
 
 export default function AnimeOfficialSite({ externales }: { externales: LinkExterno[] }) {
   if (externales.length === 0) return null;

@@ -1,21 +1,43 @@
 import { useState, useEffect } from "react";
 import { Star, Play } from "lucide-react";
-import { HERO } from "../../api/anime";
+import { obtenerHero, type HeroItem } from "../../api/catalogoService";
 
 // ─── Hero — Carrusel principal ────────────────────────────────────────────────
 
 export default function HeroSection() {
+  const [hero, setHero] = useState<HeroItem[]>([]);
   const [slideActual, setSlideActual] = useState(0);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    let vivo = true;
+    obtenerHero()
+      .then(h => vivo && setHero(h))
+      .catch(() => vivo && setHero([]))
+      .finally(() => vivo && setCargando(false));
+    return () => { vivo = false; };
+  }, []);
 
   // Avanza el carrusel automáticamente cada 6 segundos
   useEffect(() => {
+    if (hero.length === 0) return;
     const intervalo = setInterval(() => {
-      setSlideActual(s => (s + 1) % HERO.length);
+      setSlideActual(s => (s + 1) % hero.length);
     }, 6000);
     return () => clearInterval(intervalo);
-  }, []);
+  }, [hero.length]);
 
-  const heroActual = HERO[slideActual];
+  if (cargando || hero.length === 0) {
+    return (
+      <section className="relative w-full h-[460px] sm:h-[520px] lg:h-[560px] overflow-hidden bg-[#0a0910]" aria-label="Anime destacado">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-10 h-10 border-2 border-[#946ed9] border-t-transparent rounded-full animate-spin" />
+        </div>
+      </section>
+    );
+  }
+
+  const heroActual = hero[slideActual];
 
   return (
     <section
@@ -101,7 +123,7 @@ export default function HeroSection() {
 
           {/* Botón de acción */}
           <a
-            href="/"
+            href={`/anime/${heroActual.id}`}
             className="inline-flex items-center gap-2 h-11 px-5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
             style={{ background: "linear-gradient(135deg, #946ed9, #7c4dca)" }}
           >
@@ -113,7 +135,7 @@ export default function HeroSection() {
 
       {/* Indicadores de posición del carrusel */}
       <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2">
-        {HERO.map((_, i) => (
+        {hero.map((_, i) => (
           <button
             key={i}
             onClick={() => setSlideActual(i)}

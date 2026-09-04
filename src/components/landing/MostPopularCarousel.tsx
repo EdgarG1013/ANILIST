@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ArrowRight, TrendingUp } from "lucide-react";
-import type { PopularItem } from "../../api/jikan";
+import type { PopularItem } from "../../api/catalogoService";
 
 interface MostPopularCarouselProps {
   items: PopularItem[];

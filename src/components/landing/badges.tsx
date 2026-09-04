@@ -1,5 +1,5 @@
 import { Star } from "lucide-react";
-import { TIPO_COLORES } from "../../api/anime";
+import { TIPO_COLORES } from "../../api/tiposService";
 
 // ─── Badge de tipo de anime (TV, ONA, OVA, Movie) ────────────────────────────
 

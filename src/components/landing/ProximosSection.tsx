@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CalendarClock, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { buscarCatalogo, type CatalogoItem } from "../../api/jikanClient";
+import { obtenerProximos, type CatalogoItem } from "../../api/catalogoService";
 import { TipoBadge } from "./badges";
 
 // ─── Sección: Próximos — próximos estrenos de anime ──────────────────────────
@@ -12,8 +12,8 @@ export default function ProximosSection() {
 
   useEffect(() => {
     let vivo = true;
-    buscarCatalogo({ medio: "anime", estado: "upcoming", orden: "popularity:asc" })
-      .then(r => vivo && setItems(r.items))
+    obtenerProximos()
+      .then(r => vivo && setItems(r))
       .catch(() => vivo && setItems([]))
       .finally(() => vivo && setCargando(false));
     return () => { vivo = false; };
