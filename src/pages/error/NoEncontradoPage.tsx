@@ -17,7 +17,7 @@ export default function NotFoundPage() {
       <div className="relative w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 items-center gap-8 md:gap-14 lg:gap-20 text-center md:text-left">
         {/* Personaje + bocadillo */}
         <div className="order-1 md:order-2 flex flex-col items-center justify-center">
-          <div className="relative mb-4 max-w-sm sm:max-w-md md:max-w-lg">
+          <div className="relative mb-0 max-w-sm sm:max-w-md md:max-w-lg">
             <div
               className="relative z-10 rounded-2xl border-2 border-[#2a2140] bg-[#171327] p-5 sm:p-6 md:p-7 shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
               style={{ background: "linear-gradient(180deg, #1e1a30, #171327)" }}
@@ -27,40 +27,32 @@ export default function NotFoundPage() {
                 <span className="text-[#946ed9] font-bold">NINGUNA</span> parte!! ¿Se borró? ¿O la
                 escribiste mal? ¡ahh que voy hacer...!
               </p>
-              <span
-                className="absolute -bottom-[14px] left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 w-0 h-0"
-                style={{
-                  borderLeft: "12px solid transparent",
-                  borderRight: "12px solid transparent",
-                  borderTop: "14px solid #171327",
-                }}
-              />
-              <span
-                className="absolute -bottom-[17px] left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 w-0 h-0"
-                style={{
-                  borderLeft: "14px solid transparent",
-                  borderRight: "14px solid transparent",
-                  borderTop: "16px solid #2a2140",
-                }}
-              />
+                {/* 2. Punta en diagonal usando clip-path */}
+                {/* Fondo de la punta (Simula el borde #2a2140) */}
+                <span
+                    className="absolute -bottom-[15px] left-1/2 -translate-x-1/2 md:left-12 md:translate-x-0 w-6 h-4 bg-[#2a2140]"
+                    style={{ clipPath: "polygon(0 0, 100% 0, 80% 100%)" }}
+                />
+                {/* Relleno de la punta (Color de fondo #171327) */}
+                <span
+                    className="absolute -bottom-[13px] left-1/2 -translate-x-1/2 md:left-[50px] md:translate-x-0 w-[20px] h-[14px] bg-[#171327]"
+                    style={{ clipPath: "polygon(0 0, 100% 0, 80% 100%)" }}
+                />
             </div>
           </div>
 
           <img
             src={ilustracion404}
             alt="Bibliotecaria anime desesperada porque la página no existe"
-            className="w-56 xs:w-64 sm:w-72 md:w-80 lg:w-96 h-auto object-contain drop-shadow-[0_16px_32px_rgba(148,110,217,0.22)]"
+            className="mt-[-32px] w-64 xs:w-72 sm:w-80 md:w-96 lg:w-104 h-auto object-contain drop-shadow-[0_16px_32px_rgba(148,110,217,0.22)]"
             loading="eager"
           />
         </div>
 
         {/* Texto */}
         <div className="order-2 md:order-1">
-          <p className="text-[#946ed9] text-sm sm:text-base font-semibold tracking-[0.3em] uppercase mb-3">
-            Error 404
-          </p>
           <h1
-            className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4"
+            className="lg:mt-[-32px] text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4"
             style={{ fontFamily: "'Oxanium', sans-serif" }}
           >
             ¡ERROR 404! NUESTRA{" "}
