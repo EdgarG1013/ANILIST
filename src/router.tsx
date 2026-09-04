@@ -73,6 +73,7 @@ export const router = createBrowserRouter([
           { path: "anime/:id", element: <AnimeDetalladoPage /> },
           { path: "manga/:id", element: <MangaDetalladoPage /> },
           { path: "estado/:medio/:id", element: <EstadoPage /> },
+          { path: "*", element: <NotFoundPage /> }
         ],
       },
     ],
