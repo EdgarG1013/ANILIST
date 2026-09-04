@@ -28,6 +28,8 @@ import GruposPage from "./pages/panel/GruposPage";
 import GrupoDetalladoPage from "./pages/panel/GrupoDetallePage";
 import ConfiguracionPage from "./pages/panel/ConfiguracionPage";
 import EstadoPage from "./pages/panel/EstadoPage";
+// ─── Pagina de error 404 ─────────────────────────────────────────────
+import NotFoundPage from "./pages/error/NoEncontradoPage";
 
 // ─── Definición centralizada de rutas ─────────────────────────────────────────
 // Agrega aquí las rutas futuras del proyecto (detalle de anime/manga, etc.)
@@ -41,6 +43,7 @@ export const router = createBrowserRouter([
       { path: "explorar", element: <BrowsePage /> },
       { path: "anime/:id", element: <AnimeDetalladoHomePage /> },
       { path: "manga/:id", element: <MangaDetalladoHomePage /> },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
   // Páginas de autenticación — a pantalla completa, sin Navbar/Footer
@@ -70,6 +73,7 @@ export const router = createBrowserRouter([
           { path: "anime/:id", element: <AnimeDetalladoPage /> },
           { path: "manga/:id", element: <MangaDetalladoPage /> },
           { path: "estado/:medio/:id", element: <EstadoPage /> },
+          { path: "*", element: <NotFoundPage /> }
         ],
       },
     ],
