@@ -8,7 +8,7 @@ const COLUMNAS = [
     titulo: "Explorar",
     enlaces: [
       { etiqueta: "Inicio", ruta: "/" },
-      { etiqueta: "Más populares", ruta: "/explorar?type=popular" },
+      { etiqueta: "Más populares", ruta: "/explorar?type=popular-all" },
       { etiqueta: "Temporada actual", ruta: "/explorar?type=season" },
       { etiqueta: "Próximos estrenos", ruta: "/explorar?type=upcoming" },
       { etiqueta: "Top en emisión", ruta: "/explorar?type=airing" },

@@ -10,7 +10,7 @@ import SearchBar from "./SearchBar";
 const ENLACES_NAV = [
   { etiqueta: "Temporada", ruta: "/explorar?type=season" },
   { etiqueta: "Próximos", ruta: "/explorar?type=upcoming" },
-  { etiqueta: "Más Populares", ruta: "/explorar?type=popular" },
+  { etiqueta: "Más Populares", ruta: "/explorar?type=popular-all" },
 ] as const;
 
 function Avatar({ avatar, nombre }: { avatar: string | null; nombre?: string }) {

@@ -31,7 +31,7 @@ const GENRE_NAMES: Record<number, string> = {
 };
 
 type TipoPagina =
-  | "popular" | "season" | "upcoming" | "airing" | "movies"
+  | "popular" | "popular-all" | "season" | "upcoming" | "airing" | "movies"
   | "ona" | "ova" | "special" | "genre" | "season-archive";
 
 function useIcon(tipo: string, seasonName?: Temporada) {
@@ -44,6 +44,7 @@ function useIcon(tipo: string, seasonName?: Temporada) {
   }
   const map: Record<string, { icon: typeof Star; bg: string }> = {
     popular: { icon: TrendingUp, bg: "rgba(148,110,217,0.15)" },
+    "popular-all": { icon: TrendingUp, bg: "rgba(148,110,217,0.15)" },
     season: { icon: Sparkles, bg: "rgba(255,170,60,0.15)" },
     upcoming: { icon: Clock, bg: "rgba(0,180,180,0.15)" },
     airing: { icon: Radio, bg: "rgba(255,80,80,0.15)" },
@@ -64,6 +65,7 @@ function buildTitle(tipo: TipoPagina, genreId: number | null, anio: number | nul
   if (tipo === "season-archive" && season) return `${SEASON_LABELS[season]} ${anio ?? ""}`.trim();
   const map: Record<TipoPagina, string> = {
     popular: "Más Populares",
+    "popular-all": "Más Populares",
     season: "En Temporada",
     upcoming: "Próximos",
     airing: "Top en Emisión",
@@ -79,6 +81,7 @@ function buildTitle(tipo: TipoPagina, genreId: number | null, anio: number | nul
 
 const SUBTITLES: Record<TipoPagina, string> = {
   popular: "Los más populares de todos los tiempos",
+  "popular-all": "Anime y manga más populares de todos los tiempos",
   season: "Que se está emitiendo en esta temporada",
   upcoming: "Se estrena muy pronto",
   airing: "Los mejor puntuados que están en emisión",
@@ -139,7 +142,20 @@ export default function BrowsePage() {
     };
 
     const promesa: Promise<{ items: { id: number; title: string; img: string; type: string; year: number | null; score: number | null }[]; ultimaPagina: number; total: number }> =
-      tipo === "season-archive" && anio && season
+      tipo === "popular-all"
+        ? Promise.all([
+            buscarCatalogo({ medio: "anime", orden: "popularity:asc", pagina: paginaActual }),
+            buscarCatalogo({ medio: "manga", orden: "popularity:asc", pagina: paginaActual }),
+          ]).then(([animeRes, mangaRes]) => {
+            const combined = [...animeRes.items, ...mangaRes.items]
+              .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+            return {
+              items: combined,
+              ultimaPagina: Math.max(animeRes.ultimaPagina, mangaRes.ultimaPagina),
+              total: animeRes.total + mangaRes.total,
+            };
+          })
+        : tipo === "season-archive" && anio && season
         ? buscarPorTemporada(anio, season, paginaActual, true)
         : (() => {
             switch (tipo) {
@@ -171,9 +187,11 @@ export default function BrowsePage() {
 
   const titulo = buildTitle(tipo, genreId, anio, season);
   const medioLabel = medioUrl === "manga" ? "Manga" : "Anime";
-  const subtitulo = tipo === "genre"
-    ? `${medioLabel} de ${titulo} populares`
-    : `${medioLabel} — ${SUBTITLES[tipo]}`;
+  const subtitulo = tipo === "popular-all"
+    ? SUBTITLES[tipo]
+    : tipo === "genre"
+      ? `${medioLabel} de ${titulo} populares`
+      : `${medioLabel} — ${SUBTITLES[tipo]}`;
 
   function actualizarPagina(pagina: number) {
     const p = new URLSearchParams(params);
@@ -213,7 +231,7 @@ export default function BrowsePage() {
 
       {/* Filtros */}
       <div className="flex flex-wrap gap-3 mb-6">
-        {!FORMAT_PAGES.includes(tipo) && tipo !== "season-archive" && (
+        {!FORMAT_PAGES.includes(tipo) && tipo !== "season-archive" && tipo !== "popular-all" && (
           <Select
             valor={urlTipo}
             onChange={v => {
@@ -228,7 +246,7 @@ export default function BrowsePage() {
           />
         )}
 
-        {tipo !== "season-archive" && (
+        {tipo !== "season-archive" && tipo !== "popular-all" && (
           <Select
             valor={generoSeleccionado}
             onChange={v => {
