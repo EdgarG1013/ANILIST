@@ -8,7 +8,7 @@ import AnimeCard, { type AnimeCardData } from "../../components/landing/AnimeCar
 import Select from "../../components/ui/Select";
 import {
   buscarCatalogo, buscarPorTemporada, TIPOS, ESTADOS, GENEROS,
-  type Temporada,
+  type Medio, type Temporada,
 } from "../../api/catalogoService";
 import CatalogoError from "../../components/compartido/CatalogoError";
 
@@ -78,11 +78,11 @@ function buildTitle(tipo: TipoPagina, genreId: number | null, anio: number | nul
 }
 
 const SUBTITLES: Record<TipoPagina, string> = {
-  popular: "Los anime más populares de todos los tiempos",
-  season: "Anime que se está emitiendo en esta temporada",
-  upcoming: "Anime que se estrena muy pronto",
+  popular: "Los más populares de todos los tiempos",
+  season: "Que se está emitiendo en esta temporada",
+  upcoming: "Se estrena muy pronto",
   airing: "Los mejor puntuados que están en emisión",
-  movies: "Las películas de anime mejor valoradas",
+  movies: "Las películas mejor valoradas",
   ona: "Animaciones originales de internet",
   ova: "Animaciones de vídeo originales",
   special: "Episodios especiales y capítulos únicos",
@@ -98,6 +98,7 @@ export default function BrowsePage() {
   const navigate = useNavigate();
 
   const tipo = (params.get("type") || "popular") as TipoPagina;
+  const medioUrl = (params.get("medio") || "anime") as Medio;
   const genreId = params.get("genre") ? Number(params.get("genre")) : null;
   const anio = params.get("year") ? Number(params.get("year")) : null;
   const season = (params.get("season") as Temporada | null) || null;
@@ -127,7 +128,7 @@ export default function BrowsePage() {
     setError(null);
 
     const f = {
-      medio: "anime" as const,
+      medio: medioUrl,
       q: params.get("q") || "",
       tipo: urlTipo,
       genero: generoSeleccionado,
@@ -166,10 +167,13 @@ export default function BrowsePage() {
 
     return () => { vivo = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tipo, genreId, anio, season, urlTipo, urlGenero, urlEstado, paginaActual, params, retryKey]);
+  }, [tipo, medioUrl, genreId, anio, season, urlTipo, urlGenero, urlEstado, paginaActual, params, retryKey]);
 
   const titulo = buildTitle(tipo, genreId, anio, season);
-  const subtitulo = tipo === "genre" ? `Anime de ${titulo} populares` : SUBTITLES[tipo];
+  const medioLabel = medioUrl === "manga" ? "Manga" : "Anime";
+  const subtitulo = tipo === "genre"
+    ? `${medioLabel} de ${titulo} populares`
+    : `${medioLabel} — ${SUBTITLES[tipo]}`;
 
   function actualizarPagina(pagina: number) {
     const p = new URLSearchParams(params);
@@ -219,7 +223,7 @@ export default function BrowsePage() {
               p.delete("page");
               setParams(p, { replace: true });
             }}
-            opciones={[{ valor: "", etiqueta: "Tipo: Todos" }, ...TIPOS.anime.map(t => ({ valor: t, etiqueta: t }))]}
+            opciones={[{ valor: "", etiqueta: "Tipo: Todos" }, ...TIPOS[medioUrl].map(t => ({ valor: t, etiqueta: t }))]}
             className="w-44"
           />
         )}
@@ -249,7 +253,7 @@ export default function BrowsePage() {
               p.delete("page");
               setParams(p, { replace: true });
             }}
-            opciones={[{ valor: "", etiqueta: "Estado: Todos" }, ...ESTADOS.anime.map(s => ({ valor: s.valor, etiqueta: s.etiqueta }))]}
+            opciones={[{ valor: "", etiqueta: "Estado: Todos" }, ...ESTADOS[medioUrl].map(s => ({ valor: s.valor, etiqueta: s.etiqueta }))]}
             className="w-48"
           />
         )}
@@ -273,7 +277,7 @@ export default function BrowsePage() {
         <p className="py-20 text-center text-[#8b82a8]">No encontramos títulos con esos filtros.</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 mb-10">
-          {items.map(item => <AnimeCard key={item.id} anime={item} />)}
+          {items.map(item => <AnimeCard key={item.id} anime={item} medio={medioUrl} />)}
         </div>
       )}
 
