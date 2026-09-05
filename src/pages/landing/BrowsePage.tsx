@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   TrendingUp, Sparkles, Clock, Film, Radio, Tv, Star, CalendarDays,
-  Tag, Snowflake, Flower2, Sun, Leaf, ChevronLeft, ChevronRight, AlertCircle,
+  Tag, Snowflake, Flower2, Sun, Leaf, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import AnimeCard, { type AnimeCardData } from "../../components/landing/AnimeCard";
 import Select from "../../components/ui/Select";
@@ -10,6 +10,7 @@ import {
   buscarCatalogo, buscarPorTemporada, TIPOS, ESTADOS, GENEROS,
   type Temporada,
 } from "../../api/catalogoService";
+import CatalogoError from "../../components/compartido/CatalogoError";
 
 // ─── Navegador de anime (Browse) ─────────────────────────────────────────────
 // Lee la URL (?type=..., ?genre=..., ?year=...&season=...) y muestra una grilla
@@ -113,6 +114,7 @@ export default function BrowsePage() {
   const [total, setTotal] = useState(0);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
 
   // El género puede venir de la URL como id (genre=22) o como filtro seleccionado.
   const generoSeleccionado = urlGenero && urlGenero !== String(genreId ?? "") ? urlGenero : String(genreId ?? "");
@@ -164,7 +166,7 @@ export default function BrowsePage() {
 
     return () => { vivo = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tipo, genreId, anio, season, urlTipo, urlGenero, urlEstado, paginaActual, params]);
+  }, [tipo, genreId, anio, season, urlTipo, urlGenero, urlEstado, paginaActual, params, retryKey]);
 
   const titulo = buildTitle(tipo, genreId, anio, season);
   const subtitulo = tipo === "genre" ? `Anime de ${titulo} populares` : SUBTITLES[tipo];
@@ -258,11 +260,7 @@ export default function BrowsePage() {
         {cargando ? "Cargando resultados…" : `${total.toLocaleString("es")} resultados`}
       </p>
 
-      {error && (
-        <p className="flex items-center gap-2 text-sm text-[#ff9aa8] bg-[#d4183d]/10 border border-[#d4183d]/30 rounded-xl px-4 py-3 mb-4">
-          <AlertCircle className="w-4 h-4" /> {error}
-        </p>
-      )}
+      {error && <CatalogoError onReintentar={() => setRetryKey(k => k + 1)} />}
 
       {/* Grilla */}
       {cargando ? (
